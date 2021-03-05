@@ -4,8 +4,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.sql.elements import Null
-from sqlalchemy.sql.expression import null
 
 import configparser
 
@@ -20,6 +18,7 @@ Base = declarative_base()
 class Jerocat:
 
     def __init__(self):
+        print(database)
         self.engine = create_engine('sqlite:///'+database+'.sqlite')
         self.session = sessionmaker()
         self.session.configure(bind=self.engine)
@@ -161,7 +160,7 @@ class Jerocat:
 
 if __name__ == '__main__':
     print("inici")
-    j = Jerocat("orm_in_detail")
+    j = Jerocat()
 
     # creem usuaris
     u1 = j.user_add(uid=1234, name="player1")

@@ -1,3 +1,4 @@
 config.ini
 jerocatbot.db
 __pycache__/
+jerocat.sqlite
