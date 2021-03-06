@@ -18,7 +18,6 @@ Base = declarative_base()
 class Jerocat:
 
     def __init__(self):
-        print(database)
         self.engine = create_engine('sqlite:///'+database+'.sqlite')
         self.session = sessionmaker()
         self.session.configure(bind=self.engine)
@@ -94,7 +93,12 @@ class Jerocat:
             backref=backref('question',
                             uselist=True,
                             cascade='delete,all'))
-
+        def numerize():
+            """
+            Set the questions numbers
+            """
+            pass
+        
     class Question(Base):
         __tablename__ = 'question'
         id = Column(Integer, primary_key=True)
@@ -141,57 +145,19 @@ class Jerocat:
         name = Column(String, nullable=True)
         alias = Column(String, nullable=True)
         created_on = Column(DateTime, default=func.now())
-        # questions = relationship(
-        #     'Question',
-        #     backref=backref('questions',
-        #                     uselist=True,
-        #                     cascade='delete,all'))
-        # answers = relationship(
-        #     'Answer',
-        #     backref=backref('answers',
-        #                     uselist=True,
-        #                     cascade='delete,all'))
-        # games = relationship(
-        #     'Game',
-        #     backref=backref('games',
-        #                     uselist=True,
-        #                     cascade='delete,all'))
+        questions = relationship(
+            'Question',
+            backref=backref('user-questions',
+                            uselist=True,
+                            cascade='delete,all'))
+        answers = relationship(
+            'Answer',
+            backref=backref('user-answers',
+                            uselist=True,
+                            cascade='delete,all'))
+        games = relationship(
+            'Game',
+            backref=backref('user-games',
+                            uselist=True,
+                            cascade='delete,all'))
 
-
-if __name__ == '__main__':
-    print("inici")
-    j = Jerocat()
-
-    # creem usuaris
-    u1 = j.user_add(uid=1234, name="player1")
-    u2 = j.user_add(uid=5678, alias="player2")
-
-    # creem dos jocs
-    g1 = j.game_add(name="Primer Joc",user=u1)
-    g2 = j.game_add(name="Segon Joc", user=u2)
-
-    print(g1.user.name)
-
-    # Els hi posem preguntes
-    q1 = j.question_add(game=g1, question="Pregunta q1 per a g1")
-    q2 = j.question_add(game=g1, question="Pregunta q2 per a g1")
-    q3 = j.question_add(game=g1, question="Pregunta q3 per a g1")
-    q4 = j.question_add(game=g2, question="Pregunta q4 per a g2")
-    q5 = j.question_add(game=g2, question="Pregunta q5 per a g2")
-
-    # Els hi posem respostes
-    a1 = j.answer_add(question=q1, answer="Resposta a1 per a q1")
-    a2 = j.answer_add(question=q1, answer="Resposta a2 per a q1")
-    a3 = j.answer_add(question=q2, answer="Resposta a3 per a q1")
-    a4 = j.answer_add(question=q2, answer="Resposta a4 per a q2")
-    a5 = j.answer_add(question=q2, answer="Resposta a5 per a q2")
-    a6 = j.answer_add(question=q4, answer="Resposta a5 per a q4")
-    a7 = j.answer_add(question=q5, answer="Resposta a5 per a q5")
-
-    gs = j.game_list()
-    for g in gs:
-        print(str(g.name))
-        for q in g.questions:
-            print("q:"+str(q.name))
-            for a in q.answers:
-                print("a:"+str(a.name))
