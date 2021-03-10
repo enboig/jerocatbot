@@ -7,6 +7,8 @@ from sqlalchemy.orm import sessionmaker
 
 import configparser
 
+from sqlalchemy.sql.expression import except_all
+
 config = configparser.ConfigParser()
 config.read('config.ini')
 
@@ -60,6 +62,27 @@ class Jerocat:
         '''
         g = self.repo.query(self.Game).get(id)
         return g
+
+    def play_init(self, chat_id):
+        p = self.Play(chat_id=chat_id)
+        self.repo.add(p)
+        self.repo.commit()
+        return p
+
+
+    def play_get(self, chat_id):
+        '''
+        Returns the play
+        '''
+#        s = self.repo.query(self.Play).get(chat_id=chat_id)
+        print("buscant la sessió "+str(chat_id))
+        try:
+            p = self.repo.query(self.Play).filter(self.Play.chat_id==chat_id).one()
+        except:
+            p = False
+        print("la sessió trobada és: "+str(p));
+        return p
+        
 
     def game_list_full(self, uid=0):
         """
@@ -120,12 +143,13 @@ class Jerocat:
             backref=backref('question',
                             uselist=True,
                             cascade='delete,all'))
+        plays = relationship("Play", back_populates="game")
 
-        def numerize():
-            """
-            Set the questions numbers
-            """
-            pass
+    def numerize():
+        """
+        Set the questions numbers
+        """
+        pass
 
     class Question(Base):
         __tablename__ = 'question'
@@ -189,3 +213,45 @@ class Jerocat:
             backref=backref('user-games',
                             uselist=True,
                             cascade='delete,all'))
+
+    class Play(Base):
+        __tablename__ = 'play'
+        id = Column(Integer, primary_key=True)
+        chat_id = Column(Integer, unique=True)
+        created_on = Column(DateTime, default=func.now())
+        updated_on = Column(DateTime, default=func.now())
+        game_id = Column(Integer, ForeignKey('game.id'))
+        game = relationship("Game", back_populates="plays")
+
+        def set_game(self, game):
+            self.game = game
+            self.repo.commit()
+
+    class Points(Base):
+        __tablename__ = 'point'
+        id = Column(Integer, primary_key=True)
+        chatid = Column(Integer, unique=True)
+        uid = Column(String, nullable=True)
+        alias = Column(String, nullable=True)
+        created_on = Column(DateTime, default=func.now())
+        user_id = Column(Integer, ForeignKey('user.id'))
+        game_id = Column(Integer, ForeignKey('game.id'))
+        game = relationship(
+            'Game',
+            backref=backref('game_points',
+                                uselist=True,
+                                cascade='delete,all'))
+        question_id = Column(Integer, ForeignKey('question.id'))
+        question = relationship(
+            'Question',
+            backref=backref('question_points',
+                                uselist=True,
+                                cascade='delete,all'))
+        answer_id = Column(Integer, ForeignKey('answer.id'))
+        answer = relationship(
+            'Answer',
+            backref=backref('answer_points',
+                                uselist=True,
+                                cascade='delete,all'))
+
+
