@@ -1,20 +1,21 @@
-from sqlalchemy import Column, DateTime, String, Integer, ForeignKey, func
-from sqlalchemy.orm import relationship, backref
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import create_engine
-
-from sqlalchemy.orm import sessionmaker
+from datetime import date
+from base import Session, engine, Base
 
 import configparser
 
-from sqlalchemy.sql.expression import except_all
+from answer import Answer
+from game import Game
+from play import Play
+from point import Point
+from question import Question
+from user import User
+
 
 config = configparser.ConfigParser()
 config.read('config.ini')
 
-#from settings import TOKEN
-Base = declarative_base()
-
+Base.metadata.create_all(engine)
+session = Session()
 
 class Jerocat:
     # Game status
@@ -23,14 +24,16 @@ class Jerocat:
     STATUS_PENDING = 3
 
     def __init__(self):
-        if (config['database']["engine"] == "sqlite"):
-            self.engine = create_engine(
-                'sqlite:///'+config['database']["database"]+'.sqlite')
-            self.session = sessionmaker()
-            self.session.configure(bind=self.engine)
-            #Base = declarative_base()
-            Base.metadata.create_all(self.engine)
-        self.repo = self.session()
+        # if (config['database']["engine"] == "sqlite"):
+        #     self.engine = create_engine(
+        #         'sqlite:///'+config['database']["database"]+'.sqlite')
+        #     self.session = sessionmaker()
+        #     self.session.configure(bind=self.engine)
+        #     #Base = declarative_base()
+        #     print("create all!")
+        #     Base.metadata.create_all(self.engine)
+        # session = self.session()
+        pass
 
     def answer_check(self, question, answer):
         """
@@ -42,31 +45,31 @@ class Jerocat:
         '''
         Insert a user
         '''
-        u = self.User(uid=uid, name=name, alias=alias)
-        self.repo.add(u)
-        self.repo.commit()
+        u = User(uid=uid, name=name, alias=alias)
+        session.add(u)
+        session.commit()
         return u
 
     def game_add(self, name, user=None, status=0):
         '''
         Insert a empty game and returns its id
         '''
-        g = self.Game(name=name, user=user)
-        self.repo.add(g)
-        self.repo.commit()
+        g = Game(name=name, user=user)
+        session.add(g)
+        session.commit()
         return g
 
     def game_get(self, id, user=None):
         '''
         Insert a empty game and returns its id
         '''
-        g = self.repo.query(self.Game).get(id)
+        g = session.query(Game).get(id)
         return g
 
     def play_init(self, chat_id):
-        p = self.Play(chat_id=chat_id)
-        self.repo.add(p)
-        self.repo.commit()
+        p = Play(chat_id=chat_id)
+        session.add(p)
+        session.commit()
         return p
 
 
@@ -74,12 +77,14 @@ class Jerocat:
         '''
         Returns the play
         '''
-#        s = self.repo.query(self.Play).get(chat_id=chat_id)
+#        s = session.query(Play).get(chat_id=chat_id)
         print("buscant la sessió "+str(chat_id))
         try:
-            p = self.repo.query(self.Play).filter(self.Play.chat_id==chat_id).one()
+            p = session.query(Play).filter(Play.chat_id==chat_id).one()
         except:
-            p = False
+            p = Play(chat_id=chat_id)
+            session.add(p)
+            session.commit()
         print("la sessió trobada és: "+str(p));
         return p
         
@@ -89,7 +94,8 @@ class Jerocat:
         Returns a list of games. If a user is send, it also list user games
         TODO filter by user
         """
-        return self.repo.query(self.Game).all()
+        games = session.query(Game).all()
+        return games
 
     def game_list(self, uid=0):
         """
@@ -97,7 +103,7 @@ class Jerocat:
         TODO filter by user
         """
         list = {}
-        for g in self.repo.query(self.Game).all():
+        for g in session.query(Game).all():
             list[g.id] = g.name
         return list
 
@@ -111,147 +117,25 @@ class Jerocat:
         '''
         Insert a question to the game
         '''
-        q = self.Question(game=game, name=question)
-        self.repo.add(q)
-        self.repo.commit()
-        position = self.repo.query(self.Question).filter(
-            self.Question.game==q.game).filter(self.Question.id <= q.id).count()
+        q = Question(game=game, name=question)
+        session.add(q)
+        session.commit()
+        position = session.query(Question).filter(
+            Question.game==q.game).filter(Question.id <= q.id).count()
         setattr(q, 'position', position)
-        self.repo.commit()
+        session.commit()
         return q
 
     def answer_add(self, question, answer):
-        a = self.Answer(question=question, name=answer)
-        self.repo.add(a)
-        self.repo.commit()
+        a = Answer(question=question, name=answer)
+        session.add(a)
+        session.commit()
         return a
 
-    class Game(Base):
-        __tablename__ = 'game'
-        id = Column(Integer, primary_key=True)
-        name = Column(String)
-        status = Column(Integer, default=1)  # STATUS_PRIVATE
-        created_on = Column(DateTime, default=func.now())
-        user_id = Column(Integer, ForeignKey('user.id'))
-        user = relationship(
-            'User',
-            backref=backref('users',
-                            # uselist=True,
-                            cascade='delete,all'))
-        questions = relationship(
-            'Question',
-            backref=backref('question',
-                            uselist=True,
-                            cascade='delete,all'))
-        plays = relationship("Play", back_populates="game")
 
     def numerize():
         """
         Set the questions numbers
         """
         pass
-
-    class Question(Base):
-        __tablename__ = 'question'
-        id = Column(Integer, primary_key=True)
-        name = Column(String)
-        # Use default=func.now() to set the default hiring time
-        # of an Employee to be the current time when an
-        # Employee record was created
-        created_on = Column(DateTime, default=func.now())
-        position = Column(Integer, default=0)
-        user_id = Column(Integer, ForeignKey('user.id'))
-        game_id = Column(Integer, ForeignKey('game.id'))
-        # Use cascade='delete,all' to propagate the deletion of a Department onto its Employees
-        game = relationship(
-            'Game',
-            backref=backref('games',
-                            uselist=True,
-                            cascade='delete,all'))
-        answers = relationship(
-            'Answer',
-            backref=backref('answer',
-                            uselist=True,
-                            cascade='delete,all'))
-
-    class Answer(Base):
-        __tablename__ = 'answer'
-        id = Column(Integer, primary_key=True)
-        name = Column(String)
-        # Use default=func.now() to set the default hiring time
-        # of an Employee to be the current time when an
-        # Employee record was created
-        created_on = Column(DateTime, default=func.now())
-        question_id = Column(Integer, ForeignKey('question.id'))
-        user_id = Column(Integer, ForeignKey('user.id'))
-        # Use cascade='delete,all' to propagate the deletion of a Department onto its Employees
-        question = relationship(
-            'Question',
-            backref=backref('questions',
-                            uselist=True,
-                            cascade='delete,all'))
-
-    class User(Base):
-        __tablename__ = 'user'
-        id = Column(Integer, primary_key=True)
-        uid = Column(Integer, unique=True)
-        name = Column(String, nullable=True)
-        alias = Column(String, nullable=True)
-        created_on = Column(DateTime, default=func.now())
-        questions = relationship(
-            'Question',
-            backref=backref('user-questions',
-                            uselist=True,
-                            cascade='delete,all'))
-        answers = relationship(
-            'Answer',
-            backref=backref('user-answers',
-                            uselist=True,
-                            cascade='delete,all'))
-        games = relationship(
-            'Game',
-            backref=backref('user-games',
-                            uselist=True,
-                            cascade='delete,all'))
-
-    class Play(Base):
-        __tablename__ = 'play'
-        id = Column(Integer, primary_key=True)
-        chat_id = Column(Integer, unique=True)
-        created_on = Column(DateTime, default=func.now())
-        updated_on = Column(DateTime, default=func.now())
-        game_id = Column(Integer, ForeignKey('game.id'))
-        game = relationship("Game", back_populates="plays")
-
-        def set_game(self, game):
-            self.game = game
-            self.repo.commit()
-
-    class Points(Base):
-        __tablename__ = 'point'
-        id = Column(Integer, primary_key=True)
-        chatid = Column(Integer, unique=True)
-        uid = Column(String, nullable=True)
-        alias = Column(String, nullable=True)
-        created_on = Column(DateTime, default=func.now())
-        user_id = Column(Integer, ForeignKey('user.id'))
-        game_id = Column(Integer, ForeignKey('game.id'))
-        game = relationship(
-            'Game',
-            backref=backref('game_points',
-                                uselist=True,
-                                cascade='delete,all'))
-        question_id = Column(Integer, ForeignKey('question.id'))
-        question = relationship(
-            'Question',
-            backref=backref('question_points',
-                                uselist=True,
-                                cascade='delete,all'))
-        answer_id = Column(Integer, ForeignKey('answer.id'))
-        answer = relationship(
-            'Answer',
-            backref=backref('answer_points',
-                                uselist=True,
-                                cascade='delete,all'))
-
 
