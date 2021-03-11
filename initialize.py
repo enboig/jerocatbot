@@ -491,4 +491,4 @@ if __name__ == '__main__':
         print(str(g.name))
         for q in g.questions:
             print(str(q.position)+" "+q.text +
-                " [" + ', '.join([str(a.text) for a in q.answers])+"]")
+                  " [" + ', '.join([str(a.text) for a in q.answers])+"]")
