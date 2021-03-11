@@ -5,3 +5,6 @@ El bot anirà llegint els missatges i si comencen per número mirarà si és la 
 També es podrà afegir el bot a un grup i anirà controlant les punctuacions.
 
 En una segona fase es podran crear nous jocs fent servir el bot, i el gestor pugui marcar els jocs com a correctes
+
+Per fer una prova ràpida (després de renombrar i omplir config.demo.ini):
+python3 initialize.py ; python3 jerocatbot.py

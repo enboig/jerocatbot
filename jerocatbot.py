@@ -3,31 +3,40 @@ This is a detailed example using almost every command of the API
 """
 
 import time
+from sqlalchemy.sql.expression import null
 
 import telebot
 from telebot import types
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+
+from jerocat import Jerocat
+
 
 import configparser
 config = configparser.ConfigParser()
 config.read('config.ini')
 
+
 #from settings import TOKEN
-TOKEN=config['telegram']["TOKEN"]
+TOKEN = config['telegram']["TOKEN"]
+
+j = Jerocat()
 
 knownUsers = []  # todo: save these in a file,
 userStep = {}  # so they won't reset every time the bot restarts
 
 commands = {  # command description used in the "help" command
-    'start'       : 'Get used to the bot',
-    'help'        : 'Gives you information about the available commands',
-    'sendLongText': 'A test using the \'send_chat_action\' command',
-    'getImage'    : 'A test using multi-stage messages, custom keyboard, and media sending'
+    'games': 'Llista de jocs disponibles per activar',
+    'punts': 'Mostra quants punts té cada usuari',
+    'mostra': 'Mostra els jeroglífics (els solucionats amb la solució)',
+    #    'getImage'    : 'A test using multi-stage messages, custom keyboard, and media sending'
 }
 
-imageSelect = types.ReplyKeyboardMarkup(one_time_keyboard=True)  # create the image selection keyboard
-imageSelect.add('Mickey', 'Minnie')
 
-hideBoard = types.ReplyKeyboardRemove()  # if sent as reply_markup, will hide the keyboard
+# imageSelect = types.ReplyKeyboardMarkup(one_time_keyboard=True)  # create the image selection keyboard
+#imageSelect.add('Mickey', 'Minnie')
+
+# hideBoard = types.ReplyKeyboardRemove()  # if sent as reply_markup, will hide the keyboard
 
 
 # error handling if user isn't known yet
@@ -51,12 +60,49 @@ def listener(messages):
     for m in messages:
         if m.content_type == 'text':
             # print the sent message to the console
-            print(str(m.chat.first_name) + " [" + str(m.chat.id) + "]: " + m.text)
-            #print(str(m.from_user))
+            print(str(m.chat.first_name) +
+                  " [" + str(m.chat.id) + "]: " + m.text)
+            # print(str(m.from_user))
 
 
 bot = telebot.TeleBot(TOKEN)
 bot.set_update_listener(listener)  # register listener
+
+
+def games_choose_markup():
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 2
+    games = j.game_list_full()
+    for g in games:
+        markup.add(InlineKeyboardButton(g.name, callback_data=g.id))
+    return markup
+
+# handle the "/start" command
+
+
+@bot.callback_query_handler(func=lambda call: True)
+def callback_query(call):
+    print("calllllid: "+str(call))
+    g = j.game_get(call.data)
+    if (g == False):
+        print("el joc no existeix")
+        bot.answer_callback_query(call.id, "El joc no existeix!")
+        return
+    bot.answer_callback_query(call.id, "Has escollit "+g.name)
+    print("carreguem la sessió de la conversa "+call.id)
+    p = j.play_get(call.id)
+    j.play_set_game(p, g)
+
+
+@bot.message_handler(commands=['games'])
+def command_games(m):
+    cid = m.chat.id
+    p = j.play_get(cid)
+    if (p == False):
+        print("creem sessió...")
+        j.play_init(cid)
+        p = j.play_get(cid)
+    bot.send_message(cid, "Escull un joc", reply_markup=games_choose_markup())
 
 
 # handle the "/start" command
@@ -64,13 +110,16 @@ bot.set_update_listener(listener)  # register listener
 def command_start(m):
     cid = m.chat.id
     if cid not in knownUsers:  # if user hasn't used the "/start" command yet:
-        knownUsers.append(cid)  # save user id, so you could brodcast messages to all users of this bot later
-        userStep[cid] = 0  # save user id and his current "command level", so he can use the "/getImage" command
+        # save user id, so you could brodcast messages to all users of this bot later
+        knownUsers.append(cid)
+        # save user id and his current "command level", so he can use the "/getImage" command
+        userStep[cid] = 0
         bot.send_message(cid, "Hello, stranger, let me scan you...")
         bot.send_message(cid, "Scanning complete, I know you now")
         command_help(m)  # show the new user the help page
     else:
-        bot.send_message(cid, "I already know you, no need for me to scan you again!")
+        bot.send_message(
+            cid, "I already know you, no need for me to scan you again!")
 
 
 # help page
@@ -98,8 +147,10 @@ def command_long_text(m):
 @bot.message_handler(commands=['getImage'])
 def command_image(m):
     cid = m.chat.id
-    bot.send_message(cid, "Please choose your image now", reply_markup=imageSelect)  # show the keyboard
-    userStep[cid] = 1  # set the user to the next step (expecting a reply in the listener now)
+    bot.send_message(cid, "Please choose your image now",
+                     reply_markup=imageSelect)  # show the keyboard
+    # set the user to the next step (expecting a reply in the listener now)
+    userStep[cid] = 1
 
 
 # if the user has issued the "/getImage" command, process the answer
@@ -133,7 +184,8 @@ def command_text_hi(m):
 @bot.message_handler(func=lambda message: True, content_types=['text'])
 def command_default(m):
     # this is the standard reply to a normal message
-    bot.send_message(m.chat.id, "I don't understand \"" + m.text + "\"\nMaybe try the help page at /help")
+    bot.send_message(m.chat.id, "I don't understand \"" +
+                     m.text + "\"\nMaybe try the help page at /help")
 
 
 bot.polling()
