@@ -13,7 +13,25 @@ if __name__ == '__main__':
     for key, value in gs.items():
         print(str(key)+": "+value)
 
-    g=j.game_get(1)
+    g = j.game_get(1)
     print(g.name)
     for q in g.questions:
-        print(str(q.id)+q.name)
+        print(str(q.id)+" "+q.text +
+              " [" + ', '.join([str(a.text) for a in q.answers])+"]")
+
+    print(g.name)
+
+    q = 1
+    a = "manresa"
+    print(j.question_get(g, q).text+": " + a + " --> " +
+          ("correcte" if j.answer_check(g, 1, a) else "erroni"))
+
+    q = 1
+    a = "ManResa"
+    print(j.question_get(g, q).text+": " + a + " --> " +
+          ("correcte" if j.answer_check(g, 1, a) else "erroni"))
+
+    q = 1
+    a = "Manrusia"
+    print(j.question_get(g, q).text+": " + a + " --> " +
+          ("correcte" if j.answer_check(g, 1, a) else "erroni"))

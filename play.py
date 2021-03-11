@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship, backref
 
 from base import Base
 
+
 class Play(Base):
     __tablename__ = 'play'
     id = Column(Integer, primary_key=True)
@@ -11,7 +12,3 @@ class Play(Base):
     updated_on = Column(DateTime, default=func.now())
     game_id = Column(Integer, ForeignKey('game.id'))
     game = relationship("Game", back_populates="plays")
-
-    def set_game(self, game):
-        self.game = game
-        self.repo.commit()

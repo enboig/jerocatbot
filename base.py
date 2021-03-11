@@ -7,14 +7,12 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import scoped_session
 import configparser
 
-
 config = configparser.ConfigParser()
 config.read('config.ini')
 
-
-print("#####-############-###########-#####")
 if (config['database']["engine"] == "sqlite"):
-    _DB_URI = 'sqlite:///'+config['database']["database"]+'.sqlite'
+    _DB_URI = 'sqlite:///' + \
+        config['database']["database"]+'.sqlite'+"?check_same_thread=False"
 
 engine = create_engine(_DB_URI)
 

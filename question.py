@@ -3,10 +3,11 @@ from sqlalchemy.orm import relationship, backref
 
 from base import Base
 
+
 class Question(Base):
     __tablename__ = 'question'
     id = Column(Integer, primary_key=True)
-    name = Column(String)
+    text = Column(String)
     # Use default=func.now() to set the default hiring time
     # of an Employee to be the current time when an
     # Employee record was created
@@ -14,7 +15,7 @@ class Question(Base):
     position = Column(Integer, default=0)
     user_id = Column(Integer, ForeignKey('user.id'))
     game_id = Column(Integer, ForeignKey('game.id'))
-    #Use cascade='delete,all' to propagate the deletion of a Department onto its Employees
+    # Use cascade='delete,all' to propagate the deletion of a Department onto its Employees
     game = relationship(
         'Game',
         backref=backref('games',

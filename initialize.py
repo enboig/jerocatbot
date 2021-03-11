@@ -8,74 +8,142 @@ if __name__ == '__main__':
     u1 = j.user_add(uid=0, name="jerocatbot")
 
     # creem dos jocs
-    g = j.game_add(name="Plats de cuina catalana",user=u1,status=j.STATUS_PUBLIC)
+    g = j.game_add(name="Pobles i ciutats de Catalunya",
+                   user=u1, status=j.STATUS_PUBLIC)
+
+    q = j.question_add(game=g, question="✋N🙏")
+    a = j.answer_add(question=q, answer="Manresa")
+    q = j.question_add(game=g, question="NaCl🍳")
+    a = j.answer_add(question=q, answer="Salou")
+    q = j.question_add(game=g, question="🗻🐱")
+    a = j.answer_add(question=q, answer="Montgat")
+    q = j.question_add(game=g, question="🏡9⃣")
+    a = j.answer_add(question=q, answer="Masnou")
+    q = j.question_add(game=g, question="= 🧚‍♀")
+    a = j.answer_add(question=q, answer="Igualada")
+    q = j.question_add(game=g, question="🌊⭕️")
+    # a = j.answer_add(question=q, answer="")
+    q = j.question_add(game=g, question="🌁🏂u")
+    # a = j.answer_add(question=q, answer="")
+    q = j.question_add(game=g, question="⭕️😋 (-m)")
+    # a = j.answer_add(question=q, answer="")
+    q = j.question_add(game=g, question="🍷C")
+    a = j.answer_add(question=q, answer="Vic")
+    q = j.question_add(game=g, question="🏡d🐶")
+    a = j.answer_add(question=q, answer="Viladecans")
+    q = j.question_add(game=g, question="🏡🐴🐴")
+    a = j.answer_add(question=q, answer="Viladecavalls")
+    q = j.question_add(game=g, question="🍷na👱")
+    a = j.answer_add(question=q, answer="Vinaros")
+    q = j.question_add(game=g, question="🚢🐃")
+    # a = j.answer_add(question=q, answer="")
+    q = j.question_add(game=g, question="👀d🎉a")
+    a = j.answer_add(question=q, answer="Ulldecona")
+    q = j.question_add(game=g, question="👼🌼🗻8⃣(-t)")
+    a = j.answer_add(question=q, answer="Sta Margarida de Montbui")
+    q = j.question_add(game=g, question="🔫(+o)")
+    a = j.answer_add(question=q, answer="Mataró")
+    q = j.question_add(game=g, question="👼Q🐱")
+    a = j.answer_add(question=q, answer="Sant Cugat")
+    q = j.question_add(game=g, question="🌲🌲🌲🌊")
+    a = j.answer_add(question=q, answer="Pineda de Mar")
+    q = j.question_add(game=g, question="⛪️dd")
+    # a = j.answer_add(question=q, answer="")
+    q = j.question_add(game=g, question="🍺 z-->r")
+    a = j.answer_add(question=q, answer="Cervera")
+    q = j.question_add(game=g, question="🏊🌊🌊")
+    # a = j.answer_add(question=q, answer="")
+    q = j.question_add(game=g, question="🗻◻️")
+    a = j.answer_add(question=q, answer="Montblanc")
+    q = j.question_add(game=g, question="🌞📢")
+    a = j.answer_add(question=q, answer="Solsona")
+    q = j.question_add(game=g, question="🏨et 👶")
+    a = j.answer_add(question=q, answer="Hospitalet de l'Infant")
+    q = j.question_add(game=g, question="✈️ (+ny)")
+    # a = j.answer_add(question=q, answer="")
+    q = j.question_add(game=g, question="🍷🙎")
+    # a = j.answer_add(question=q, answer="")
+    q = j.question_add(game=g, question="👼🌁🌊 a---->i")
+    # a = j.answer_add(question=q, answer="")
+    q = j.question_add(game=g, question="🏡🚱")
+    a = j.answer_add(question=q, answer="Vilaseca")
+    q = j.question_add(game=g, question="⬆️🍁")
+    a = j.answer_add(question=q, answer="Altafulla")
+    q = j.question_add(game=g, question="🔫(-r)D🍐")
+    a = j.answer_add(question=q, answer="Matadepera")
+    q = j.question_add(game=g, question="🔄🌊")
+    a = j.answer_add(question=q, answer="Girona")
+    q = j.question_add(game=g, question="🚰❄️")
+    a = j.answer_add(question=q, answer="Aiguafreda")
+
+    g = j.game_add(name="Plats de cuina catalana",
+                   user=u1, status=j.STATUS_PUBLIC)
 
     # Els hi posem preguntes
-    q = j.question_add(game=g, question="🛡️👉👩‍🦰");
+    q = j.question_add(game=g, question="🛡️👉👩‍🦰")
     a = j.answer_add(question=q, answer="Escudella")
-    q = j.question_add(game=g, question="🦶🦶🐷+🦵🚱");
+    q = j.question_add(game=g, question="🦶🦶🐷+🦵🚱")
     #a = j.answer_add(question=q, answer="")
-    q = j.question_add(game=g, question="🏠👉🤴👸🏻d🐟");
+    q = j.question_add(game=g, question="🏠👉🤴👸🏻d🐟")
     #a = j.answer_add(question=q, answer="")
-    q = j.question_add(game=g, question="👅🐃");
+    q = j.question_add(game=g, question="👅🐃")
     a = j.answer_add(question=q, answer="Llengua de bou")
-    q = j.question_add(game=g, question="🦢🍐🍐🍷");
+    q = j.question_add(game=g, question="🦢🍐🍐🍷")
     #a = j.answer_add(question=q, answer="")
-    q = j.question_add(game=g, question="🔪🥮👈⭕️");
+    q = j.question_add(game=g, question="🔪🥮👈⭕️")
     #a = j.answer_add(question=q, answer="")
-    q = j.question_add(game=g, question="🥯👑👑👑");
+    q = j.question_add(game=g, question="🥯👑👑👑")
     a = j.answer_add(question=q, answer="Tortell de Reis")
-    q = j.question_add(game=g, question="1000 🌿☘️🍃d🍄🍄");
+    q = j.question_add(game=g, question="1000 🌿☘️🍃d🍄🍄")
     #a = j.answer_add(question=q, answer="")
-    q = j.question_add(game=g, question="🐵d🗿");
+    q = j.question_add(game=g, question="🐵d🗿")
     a = j.answer_add(question=q, answer="Mona de Pasqua")
-    q = j.question_add(game=g, question=" 🥗d 💴💶💴");
+    q = j.question_add(game=g, question="🥗d 💴💶💴")
     #a = j.answer_add(question=q, answer="")
-    q = j.question_add(game=g, question="🅰️👦🍯🧸+🎺🎺⚰️✝️");
+    q = j.question_add(game=g, question="🅰️👦🍯🧸+🎺🎺⚰️✝️")
     #a = j.answer_add(question=q, answer="")
-    q = j.question_add(game=g, question="(🍧🥧🍮)d🎶🎷🎸");
+    q = j.question_add(game=g, question="(🍧🥧🍮)d🎶🎷🎸")
     #a = j.answer_add(question=q, answer="")
-    q = j.question_add(game=g, question="👙");
+    q = j.question_add(game=g, question="👙")
     #a = j.answer_add(question=q, answer="")
-    q = j.question_add(game=g, question="🔊🥖d🔚🎲🎲a--->e");
+    q = j.question_add(game=g, question="🔊🥖d🔚🎲🎲a--->e")
     #a = j.answer_add(question=q, answer="")
-    q = j.question_add(game=g, question="🥔🥔 o 🔦");
+    q = j.question_add(game=g, question="🥔🥔 o 🔦")
     #a = j.answer_add(question=q, answer="")
-    q = j.question_add(game=g, question="(🇬🇧🐭-a) d 🍫🍊");
+    q = j.question_add(game=g, question="(🇬🇧🐭-a) d 🍫🍊")
     #a = j.answer_add(question=q, answer="")
-    q = j.question_add(game=g, question="🅰️👦⛩️");
+    q = j.question_add(game=g, question="🅰️👦⛩️")
     #a = j.answer_add(question=q, answer="")
-    q = j.question_add(game=g, question="🚃-go🤫+🦵🟡🟡");
+    q = j.question_add(game=g, question="🚃-go🤫+🦵🟡🟡")
     #a = j.answer_add(question=q, answer="")
-    q = j.question_add(game=g, question="🔊🥖🥶 d 🍉");
+    q = j.question_add(game=g, question="🔊🥖🥶 d 🍉")
     #a = j.answer_add(question=q, answer="")
-    q = j.question_add(game=g, question=" 🥙🧀🐐");
+    q = j.question_add(game=g, question="🥙🧀🐐")
     #a = j.answer_add(question=q, answer="")
-    q = j.question_add(game=g, question="🥧🧀+🍯🧚‍♀️🍓");
+    q = j.question_add(game=g, question="🥧🧀+🍯🧚‍♀️🍓")
     #a = j.answer_add(question=q, answer="")
-    q = j.question_add(game=g, question="🔥ll*ll");
+    q = j.question_add(game=g, question="🔥ll*ll")
     #a = j.answer_add(question=q, answer="")
-    q = j.question_add(game=g, question="🅰️👦+🥛🍼");
+    q = j.question_add(game=g, question="🅰️👦+🥛🍼")
     #a = j.answer_add(question=q, answer="")
-    q = j.question_add(game=g, question="👠👡👢👟a--->o");
+    q = j.question_add(game=g, question="👠👡👢👟a--->o")
     a = j.answer_add(question=q, answer="Calçots")
-    q = j.question_add(game=g, question="🥙d🍅i 🧅🥊💥👊");
+    q = j.question_add(game=g, question="🥙d🍅i 🧅🥊💥👊")
     #a = j.answer_add(question=q, answer="")
-    q = j.question_add(game=g, question="💪d👨🏽‍🎤");
+    q = j.question_add(game=g, question="💪d👨🏽‍🎤")
     a = j.answer_add(question=q, answer="Braç de gitano")
-    q = j.question_add(game=g, question="💩a-->o d 👼 joan");
+    q = j.question_add(game=g, question="💩a-->o d 👼 joan")
     a = j.answer_add(question=q, answer="Coca de Sant Joan")
-    q = j.question_add(game=g, question="(🥖🤷‍♂️🥖) d🧀");
+    q = j.question_add(game=g, question="(🥖🤷‍♂️🥖) d🧀")
     #a = j.answer_add(question=q, answer="")
-    q = j.question_add(game=g, question="🥚🥚🥚👉🍽️");
+    q = j.question_add(game=g, question="🥚🥚🥚👉🍽️")
     #a = j.answer_add(question=q, answer="")
-    q = j.question_add(game=g, question="🥖d 😫👌d🍷c");
+    q = j.question_add(game=g, question="🥖d 😫👌d🍷c")
     #a = j.answer_add(question=q, answer="")
-    q = j.question_add(game=g, question=" 🐙 🧚‍♀️(🇫🇷) (🛣️🏃‍♂️🇪🇸)");
+    q = j.question_add(game=g, question="🐙 🧚‍♀️(🇫🇷) (🛣️🏃‍♂️🇪🇸)")
     #a = j.answer_add(question=q, answer="")
 
-
-    g = j.game_add(name="Varietats de raïm",user=u1)
+    g = j.game_add(name="Varietats de raïm", user=u1)
     #q = j.question_add(game=g, question="");
     #a = j.answer_add(question=q, answer="")
     q = j.question_add(game=g, question="Gr🦵🏻⚪️")
@@ -117,312 +185,310 @@ if __name__ == '__main__':
     q = j.question_add(game=g, question="🔨🐥")
     a = j.answer_add(question=q, answer="Picapoll")
 
-    g = j.game_add(name="Caves de Sant Sadurní",user=u1)
+    g = j.game_add(name="Caves de Sant Sadurní", user=u1)
     #q = j.question_add(game=g, question="");
     #a = j.answer_add(question=q, answer="")
-    q = j.question_add(game=g, question="🎄⭐️");
-    q = j.question_add(game=g, question="👨🏻‍🦳🌳🍈");
-    q = j.question_add(game=g, question="🅰️🍵🚽");
-    q = j.question_add(game=g, question="🍚🐒");
-    q = j.question_add(game=g, question="⛲️🌲🛁");
-    q = j.question_add(game=g, question="🎵💸E🎵");
-    q = j.question_add(game=g, question="🗼🗼");
-    q = j.question_add(game=g, question="👩🏼‍🏫👨🏻‍🏫");
-    q = j.question_add(game=g, question="🗼🐺➖🅿️");
-    q = j.question_add(game=g, question="🟢🍾➖🅿️ (👧)");
-    q = j.question_add(game=g, question="👨🏻‍🦳🦁");
-    q = j.question_add(game=g, question="👨🏻‍🦳🗼🐺➖🅿️🔫");
-    q = j.question_add(game=g, question="🐺🎨");
-    q = j.question_add(game=g, question="🏘🎨🚀");
-    q = j.question_add(game=g, question="🍐💨👉🏻Ra");
-    q = j.question_add(game=g, question="🖥I🐄NE");
-    q = j.question_add(game=g, question="⚪️🪑");
-    q = j.question_add(game=g, question="CO🚪❌1️⃣");
-    q = j.question_add(game=g, question="🆓XE🛁");
-    q = j.question_add(game=g, question="👨🏼‍🦳♻️♻️");
-    q = j.question_add(game=g, question="🛕⚪️");
-    q = j.question_add(game=g, question="🏰    DE  🗻🐶");
-    q = j.question_add(game=g, question="⛰🎿US");
-    q = j.question_add(game=g, question="👦🏻 I 🏞");
-    q = j.question_add(game=g, question="🖥 I ⛪️");
-    q = j.question_add(game=g, question="📜🎤🎨");
-    q = j.question_add(game=g, question="AL👀🧄");
-    q = j.question_add(game=g, question="🛕🔥👩🏼");
-    q = j.question_add(game=g, question="L’💰❗️🔫");
-    q = j.question_add(game=g, question="🌊IA RI🥅⚽️💻");
-    q = j.question_add(game=g, question="👦🏻✋🏻🍏🍑🍒👩🏼");
-    q = j.question_add(game=g, question="🕊👉🏼🧒");
-    q = j.question_add(game=g, question="🏪🍺 i 🃏");
-    q = j.question_add(game=g, question="🌞E 👦🏻");
-    q = j.question_add(game=g, question="ES🍯");
-    q = j.question_add(game=g, question="💨👉🏻RA🌞ER");
-    q = j.question_add(game=g, question="RA💨🗣I⚪️");
-    q = j.question_add(game=g, question="🏡🌲🍈");
-    q = j.question_add(game=g, question="🏰👩🏻‍🦰");
-    q = j.question_add(game=g, question="👦🏼👈🏻I ♦️🐻A");
-    q = j.question_add(game=g, question="🌊IA🏠🚫VAS");
-    q = j.question_add(game=g, question="🏰⚪️");
-    q = j.question_add(game=g, question="MUS🏡🌞");
-    q = j.question_add(game=g, question="🌎🃏TELL");
-    q = j.question_add(game=g, question="🏡💶🃏");
-    q = j.question_add(game=g, question="👨🏼‍🦳");
-    q = j.question_add(game=g, question="👮🏻‍♂️👵🏻⚫️");
-    q = j.question_add(game=g, question="🏡TI💍");
-    q = j.question_add(game=g, question="NA🟩🐜");
-    q = j.question_add(game=g, question="💂🏼‍♀️🌎IS🧟‍♀️");
-    q = j.question_add(game=g, question="CO🍷DES");
-    q = j.question_add(game=g, question="🌲 I 💃🏼🕺🏻");
-    q = j.question_add(game=g, question="🏡ET");
-    q = j.question_add(game=g, question="🍐L🧚🏻");
-    q = j.question_add(game=g, question="➕🗻");
-    q = j.question_add(game=g, question="👩🏼🟢🛁");
-    q = j.question_add(game=g, question="🏰 DE 👼👱🏻‍♂️");
-    q = j.question_add(game=g, question="⛲️ JUI");
+    q = j.question_add(game=g, question="🎄⭐️")
+    q = j.question_add(game=g, question="👨🏻‍🦳🌳🍈")
+    q = j.question_add(game=g, question="🅰️🍵🚽")
+    q = j.question_add(game=g, question="🍚🐒")
+    q = j.question_add(game=g, question="⛲️🌲🛁")
+    q = j.question_add(game=g, question="🎵💸E🎵")
+    q = j.question_add(game=g, question="🗼🗼")
+    q = j.question_add(game=g, question="👩🏼‍🏫👨🏻‍🏫")
+    q = j.question_add(game=g, question="🗼🐺➖🅿️")
+    q = j.question_add(game=g, question="🟢🍾➖🅿️ (👧)")
+    q = j.question_add(game=g, question="👨🏻‍🦳🦁")
+    q = j.question_add(game=g, question="👨🏻‍🦳🗼🐺➖🅿️🔫")
+    q = j.question_add(game=g, question="🐺🎨")
+    q = j.question_add(game=g, question="🏘🎨🚀")
+    q = j.question_add(game=g, question="🍐💨👉🏻Ra")
+    q = j.question_add(game=g, question="🖥I🐄NE")
+    q = j.question_add(game=g, question="⚪️🪑")
+    q = j.question_add(game=g, question="CO🚪❌1️⃣")
+    q = j.question_add(game=g, question="🆓XE🛁")
+    q = j.question_add(game=g, question="👨🏼‍🦳♻️♻️")
+    q = j.question_add(game=g, question="🛕⚪️")
+    q = j.question_add(game=g, question="🏰    DE  🗻🐶")
+    q = j.question_add(game=g, question="⛰🎿US")
+    q = j.question_add(game=g, question="👦🏻 I 🏞")
+    q = j.question_add(game=g, question="🖥 I ⛪️")
+    q = j.question_add(game=g, question="📜🎤🎨")
+    q = j.question_add(game=g, question="AL👀🧄")
+    q = j.question_add(game=g, question="🛕🔥👩🏼")
+    q = j.question_add(game=g, question="L’💰❗️🔫")
+    q = j.question_add(game=g, question="🌊IA RI🥅⚽️💻")
+    q = j.question_add(game=g, question="👦🏻✋🏻🍏🍑🍒👩🏼")
+    q = j.question_add(game=g, question="🕊👉🏼🧒")
+    q = j.question_add(game=g, question="🏪🍺 i 🃏")
+    q = j.question_add(game=g, question="🌞E 👦🏻")
+    q = j.question_add(game=g, question="ES🍯")
+    q = j.question_add(game=g, question="💨👉🏻RA🌞ER")
+    q = j.question_add(game=g, question="RA💨🗣I⚪️")
+    q = j.question_add(game=g, question="🏡🌲🍈")
+    q = j.question_add(game=g, question="🏰👩🏻‍🦰")
+    q = j.question_add(game=g, question="👦🏼👈🏻I ♦️🐻A")
+    q = j.question_add(game=g, question="🌊IA🏠🚫VAS")
+    q = j.question_add(game=g, question="🏰⚪️")
+    q = j.question_add(game=g, question="MUS🏡🌞")
+    q = j.question_add(game=g, question="🌎🃏TELL")
+    q = j.question_add(game=g, question="🏡💶🃏")
+    q = j.question_add(game=g, question="👨🏼‍🦳")
+    q = j.question_add(game=g, question="👮🏻‍♂️👵🏻⚫️")
+    q = j.question_add(game=g, question="🏡TI💍")
+    q = j.question_add(game=g, question="NA🟩🐜")
+    q = j.question_add(game=g, question="💂🏼‍♀️🌎IS🧟‍♀️")
+    q = j.question_add(game=g, question="CO🍷DES")
+    q = j.question_add(game=g, question="🌲 I 💃🏼🕺🏻")
+    q = j.question_add(game=g, question="🏡ET")
+    q = j.question_add(game=g, question="🍐L🧚🏻")
+    q = j.question_add(game=g, question="➕🗻")
+    q = j.question_add(game=g, question="👩🏼🟢🛁")
+    q = j.question_add(game=g, question="🏰 DE 👼👱🏻‍♂️")
+    q = j.question_add(game=g, question="⛲️ JUI")
 
-    g = j.game_add(name="Pel·lícules",user=u1)
+    g = j.game_add(name="Pel·lícules", user=u1)
     #q = j.question_add(game=g, question="");
     #a = j.answer_add(question=q, answer="")
-    q = j.question_add(game=g, question="😊😊😢😢");
-    a = j.answer_add(question=q, answer="Sonrisas y lágrimas");
-    q = j.question_add(game=g, question="🎤☔️");
-    q = j.question_add(game=g, question="📖🌴");
-    q = j.question_add(game=g, question="👻🎼");
-    q = j.question_add(game=g, question="🤫🐑🐑🐑🐑");
-    q = j.question_add(game=g, question="🌏🐒🐒🐒");
-    q = j.question_add(game=g, question="👼👼👿😈");
-    q = j.question_add(game=g, question="☕️🥐💎💎");
-    q = j.question_add(game=g, question="💍💍💍💍⚰️");
-    q = j.question_add(game=g, question="🔓🌅");
+    q = j.question_add(game=g, question="😊😊😢😢")
+    a = j.answer_add(question=q, answer="Sonrisas y lágrimas")
+    a = j.answer_add(question=q, answer="Somriures i llàgrimes")
+    q = j.question_add(game=g, question="🎤☔️")
+    q = j.question_add(game=g, question="📖🌴")
+    q = j.question_add(game=g, question="👻🎼")
+    q = j.question_add(game=g, question="🤫🐑🐑🐑🐑")
+    q = j.question_add(game=g, question="🌏🐒🐒🐒")
+    q = j.question_add(game=g, question="👼👼👿😈")
+    q = j.question_add(game=g, question="☕️🥐💎💎")
+    q = j.question_add(game=g, question="💍💍💍💍⚰️")
+    q = j.question_add(game=g, question="🔓🌅")
 
-
-    g = j.game_add(name="Places, carrers i llocs de Sant Sadurní",user=u1)
+    g = j.game_add(name="Places, carrers i llocs de Sant Sadurní", user=u1)
     #q = j.question_add(game=g, question="");
-    q = j.question_add(game=g, question="⛰️🔪");
-    q = j.question_add(game=g, question="⛪️");
-    q = j.question_add(game=g, question="🎥⛳️🕋🙋🏼‍♂️");
-    q = j.question_add(game=g, question="🗣️❗️🤚🏻🧍‍♀️");
-    q = j.question_add(game=g, question="🎵👀🚫");
-    q = j.question_add(game=g, question="🏘️®️🛸");
-    q = j.question_add(game=g, question="🌼🌼");
-    q = j.question_add(game=g, question="🏘️🚫🏦");
-    q = j.question_add(game=g, question="🏠🏠🥼🏥");
-    q = j.question_add(game=g, question="⛲️👉🏍️");
-    q = j.question_add(game=g, question="💪®️🐣");
-    q = j.question_add(game=g, question="⏫©️🅰️");
-    q = j.question_add(game=g, question="👳‍♀️🐶");
-    q = j.question_add(game=g, question="📄📄📄");
-    q = j.question_add(game=g, question="🎡🎢💐🗣️");
-    q = j.question_add(game=g, question="🕌🅾️");
-    q = j.question_add(game=g, question="⏬©️🅰️");
-    q = j.question_add(game=g, question="➕3️⃣🕋🙋🏼‍♂️");
-    q = j.question_add(game=g, question="🐱🚬");
-    q = j.question_add(game=g, question="👀");
-    q = j.question_add(game=g, question="🐶✝️®️👉🏡");
-    q = j.question_add(game=g, question="🌉🚉");
-    q = j.question_add(game=g, question="🎡🎢🎵👀🚫");
-    q = j.question_add(game=g, question="🏬🏬🗣️👂");
-    q = j.question_add(game=g, question="🌉®️🤚🏻");
-    q = j.question_add(game=g, question="😇🍐");
-    q = j.question_add(game=g, question="🏥");
-    q = j.question_add(game=g, question="🖕🅿️🚉");
-    q = j.question_add(game=g, question="🏭");
-    q = j.question_add(game=g, question="🤝🏯🏯");
-    q = j.question_add(game=g, question="🧊🌬️");
-    q = j.question_add(game=g, question="⛲️✝️");
-    q = j.question_add(game=g, question="🏟️🦊");
-    q = j.question_add(game=g, question="🎵🏭🧱");
-    q = j.question_add(game=g, question="🌍🖕");
-    q = j.question_add(game=g, question="↪️🌊");
-    q = j.question_add(game=g, question="🕋🌊");
-    q = j.question_add(game=g, question="🏚️🍻☄️🌊");
-    q = j.question_add(game=g, question="😇5️⃣❗️");
-    q = j.question_add(game=g, question="🏄‍♀️🥇👉🧍‍♂️");
-    q = j.question_add(game=g, question="ℹ️🇬🇧🕋");
-    q = j.question_add(game=g, question="🏟️🇪🇺");
-    q = j.question_add(game=g, question="👨‍🔬🏚️®️");
-    q = j.question_add(game=g, question="🏬⛪️🏫🏥👉🧍‍♀️");
-    q = j.question_add(game=g, question="🌹🌹🌹");
+    q = j.question_add(game=g, question="⛰️🔪")
+    q = j.question_add(game=g, question="⛪️")
+    q = j.question_add(game=g, question="🎥⛳️🕋🙋🏼‍♂️")
+    q = j.question_add(game=g, question="🗣️❗️🤚🏻🧍‍♀️")
+    q = j.question_add(game=g, question="🎵👀🚫")
+    q = j.question_add(game=g, question="🏘️®️🛸")
+    q = j.question_add(game=g, question="🌼🌼")
+    q = j.question_add(game=g, question="🏘️🚫🏦")
+    q = j.question_add(game=g, question="🏠🏠🥼🏥")
+    q = j.question_add(game=g, question="⛲️👉🏍️")
+    q = j.question_add(game=g, question="💪®️🐣")
+    q = j.question_add(game=g, question="⏫©️🅰️")
+    q = j.question_add(game=g, question="👳‍♀️🐶")
+    q = j.question_add(game=g, question="📄📄📄")
+    q = j.question_add(game=g, question="🎡🎢💐🗣️")
+    q = j.question_add(game=g, question="🕌🅾️")
+    q = j.question_add(game=g, question="⏬©️🅰️")
+    q = j.question_add(game=g, question="➕3️⃣🕋🙋🏼‍♂️")
+    q = j.question_add(game=g, question="🐱🚬")
+    q = j.question_add(game=g, question="👀")
+    q = j.question_add(game=g, question="🐶✝️®️👉🏡")
+    q = j.question_add(game=g, question="🌉🚉")
+    q = j.question_add(game=g, question="🎡🎢🎵👀🚫")
+    q = j.question_add(game=g, question="🏬🏬🗣️👂")
+    q = j.question_add(game=g, question="🌉®️🤚🏻")
+    q = j.question_add(game=g, question="😇🍐")
+    q = j.question_add(game=g, question="🏥")
+    q = j.question_add(game=g, question="🖕🅿️🚉")
+    q = j.question_add(game=g, question="🏭")
+    q = j.question_add(game=g, question="🤝🏯🏯")
+    q = j.question_add(game=g, question="🧊🌬️")
+    q = j.question_add(game=g, question="⛲️✝️")
+    q = j.question_add(game=g, question="🏟️🦊")
+    q = j.question_add(game=g, question="🎵🏭🧱")
+    q = j.question_add(game=g, question="🌍🖕")
+    q = j.question_add(game=g, question="↪️🌊")
+    q = j.question_add(game=g, question="🕋🌊")
+    q = j.question_add(game=g, question="🏚️🍻☄️🌊")
+    q = j.question_add(game=g, question="😇5️⃣❗️")
+    q = j.question_add(game=g, question="🏄‍♀️🥇👉🧍‍♂️")
+    q = j.question_add(game=g, question="ℹ️🇬🇧🕋")
+    q = j.question_add(game=g, question="🏟️🇪🇺")
+    q = j.question_add(game=g, question="👨‍🔬🏚️®️")
+    q = j.question_add(game=g, question="🏬⛪️🏫🏥👉🧍‍♀️")
+    q = j.question_add(game=g, question="🌹🌹🌹")
 
-    g = j.game_add(name="Poblacions del Penedès",user=u1)
+    g = j.game_add(name="Poblacions del Penedès", user=u1)
     #q = j.question_add(game=g, question="");
-    q = j.question_add(game=g, question="🥇⬆️");
-    a = j.answer_add(question=q, answer="Ordal");
-    q = j.question_add(game=g, question="🕌🍷🎵📍");
-    a = j.answer_add(question=q, answer="Castellví de la marca");
-    q = j.question_add(game=g, question="🧊🌬");
-    a = j.answer_add(question=q, answer="Gelida");
-    q = j.question_add(game=g, question="😇🤝🥇⬆️");
-    a = j.answer_add(question=q, answer="Sant Pau d'Ordal");
-    q = j.question_add(game=g, question="😇🌼👲👲");
-    a = j.answer_add(question=q, answer="Sta Margarida i els Monjos");
-    q = j.question_add(game=g, question="😇🌈🚽");
-    a = j.answer_add(question=q, answer="Sant Martí Sarroca");
-    q = j.question_add(game=g, question="🌉🐀🐀");
-    a = j.answer_add(question=q, answer="Pontons");
-    q = j.question_add(game=g, question="🐰🐰");
-    a = j.answer_add(question=q, answer="Conilleres");
-    q = j.question_add(game=g, question="🐶🤘");
-    a = j.answer_add(question=q, answer="Les Cabanyes");
-    q = j.question_add(game=g, question="⛲️💍");
-    a = j.answer_add(question=q, answer="Font-Rubí");
-    q = j.question_add(game=g, question="🐷🏄‍♀");
-    a = j.answer_add(question=q, answer="Sardinyola");
-    q = j.question_add(game=g, question="🏘🦊🦊");
-    a = j.answer_add(question=q, answer="Viladellops");
-    q = j.question_add(game=g, question="💃®️🌊");
-    a = j.answer_add(question=q, answer="Olèrdola");
-    q = j.question_add(game=g, question="⛰👉🧍");
-    a = j.answer_add(question=q, answer="Montmell");
-    q = j.question_add(game=g, question="😇🍸");
-    a = j.answer_add(question=q, answer="Santa Oliva");
-    q = j.question_add(game=g, question="©️🕴🐛");
-    a = j.answer_add(question=q, answer="Comarruga");
-    q = j.question_add(game=g, question="😇🌞🍆🥒🧅");
-    a = j.answer_add(question=q, answer="Sant Llorenç d'Hortons");
-    q = j.question_add(game=g, question="🕋🎵🍇");
-    a = j.answer_add(question=q, answer="Torrelavit");
-    q = j.question_add(game=g, question="🌍🌊");
-    a = j.answer_add(question=q, answer="Mediona");
-    q = j.question_add(game=g, question="📈❗️🧶");
-    a = j.answer_add(question=q, answer="Subirats");
-    q = j.question_add(game=g, question="😇🍐👜®️");
-    a = j.answer_add(question=q, answer="Sant Pere Sacarrera");
-    q = j.question_add(game=g, question="😇🍐🌉🎳");
-    a = j.answer_add(question=q, answer="Sant Pere de Riudebitlles");
-    q = j.question_add(game=g, question="🏘🚫🏦🅿️");
-    a = j.answer_add(question=q, answer="Vilafranca del Penedès");
-    q = j.question_add(game=g, question="😇🪐👉👱‍♀");
-    a = j.answer_add(question=q, answer="Sant Sadurní d'Anoia");
-    q = j.question_add(game=g, question="😇5⃣❗️🌍🌊");
-    a = j.answer_add(question=q, answer="Sant Quintí de Mediona");
-    q = j.question_add(game=g, question="😇🏄‍♀🧂");
-    a = j.answer_add(question=q, answer="Sant Marçal");
-    q = j.question_add(game=g, question="🎵🏃‍♀");
-    a = j.answer_add(question=q, answer="La Ràpita");
-    q = j.question_add(game=g, question="🏠⚪️");
-    a = j.answer_add(question=q, answer="Casablanca");
-    q = j.question_add(game=g, question="👉➖🅿️");
-    a = j.answer_add(question=q, answer="El Pla del Penedès");
-    q = j.question_add(game=g, question="😇✝️🅿️");
-    a = j.answer_add(question=q, answer="Santa Fe del Penedès");
-    q = j.question_add(game=g, question="😇🧅🧅🧍‍♀🟡");
-    a = j.answer_add(question=q, answer="Sant Sebastià dels Gorgs");
-    q = j.question_add(game=g, question="🕋💐🌊");
-    a = j.answer_add(question=q, answer="Torreramona");
-    q = j.question_add(game=g, question="🎵⛰🔘");
-    a = j.answer_add(question=q, answer="La Muntanya Rodona");
-    q = j.question_add(game=g, question="♂✔️🔚®️👤");
-    a = j.answer_add(question=q, answer="El Vendrell");
-    q = j.question_add(game=g, question="🏠🔴");
-    a = j.answer_add(question=q, answer="Can Roig");
-    q = j.question_add(game=g, question="☀️🅿️");
-    a = j.answer_add(question=q, answer="Llorenç del Penedès");
-    q = j.question_add(game=g, question="🎵🐝");
-    a = j.answer_add(question=q, answer="L'Avellà");
-    q = j.question_add(game=g, question="🍷🅾️🍷🅿️");
-    a = j.answer_add(question=q, answer="Vilobí del Penedès");
-    q = j.question_add(game=g, question="🎵⛲️🌲🌲🌲");
-    a = j.answer_add(question=q, answer="La Font del Bosc");
-    q = j.question_add(game=g, question="⬆️🏄‍♂");
-    a = j.answer_add(question=q, answer="Daltmar");
-    q = j.question_add(game=g, question="🎵💣🅿️");
-    a = j.answer_add(question=q, answer="La Granada del Penedès");
-    q = j.question_add(game=g, question="🛁🛁🅿️");
-    a = j.answer_add(question=q, answer="Banyeres del Penedès");
-    q = j.question_add(game=g, question="🐶📦");
-    a = j.answer_add(question=q, answer="Can Cartró");
-    q = j.question_add(game=g, question="🗣🎤🦊🦊");
-    a = j.answer_add(question=q, answer="Cantallops");
-    q = j.question_add(game=g, question="🐶🐑🚿🎵🛳");
-    a = j.answer_add(question=q, answer="Can Benet de la Prua");
-    q = j.question_add(game=g, question="⛰🌲");
-    a = j.answer_add(question=q, answer="Puigdàlber");
-    q = j.question_add(game=g, question="🔨👭🏞");
+    q = j.question_add(game=g, question="🥇⬆️")
+    a = j.answer_add(question=q, answer="Ordal")
+    q = j.question_add(game=g, question="🕌🍷🎵📍")
+    a = j.answer_add(question=q, answer="Castellví de la marca")
+    q = j.question_add(game=g, question="🧊🌬")
+    a = j.answer_add(question=q, answer="Gelida")
+    q = j.question_add(game=g, question="😇🤝🥇⬆️")
+    a = j.answer_add(question=q, answer="Sant Pau d'Ordal")
+    q = j.question_add(game=g, question="😇🌼👲👲")
+    a = j.answer_add(question=q, answer="Sta Margarida i els Monjos")
+    q = j.question_add(game=g, question="😇🌈🚽")
+    a = j.answer_add(question=q, answer="Sant Martí Sarroca")
+    q = j.question_add(game=g, question="🌉🐀🐀")
+    a = j.answer_add(question=q, answer="Pontons")
+    q = j.question_add(game=g, question="🐰🐰")
+    a = j.answer_add(question=q, answer="Conilleres")
+    q = j.question_add(game=g, question="🐶🤘")
+    a = j.answer_add(question=q, answer="Les Cabanyes")
+    q = j.question_add(game=g, question="⛲️💍")
+    a = j.answer_add(question=q, answer="Font-Rubí")
+    q = j.question_add(game=g, question="🐷🏄‍♀")
+    a = j.answer_add(question=q, answer="Sardinyola")
+    q = j.question_add(game=g, question="🏘🦊🦊")
+    a = j.answer_add(question=q, answer="Viladellops")
+    q = j.question_add(game=g, question="💃®️🌊")
+    a = j.answer_add(question=q, answer="Olèrdola")
+    q = j.question_add(game=g, question="⛰👉🧍")
+    a = j.answer_add(question=q, answer="Montmell")
+    q = j.question_add(game=g, question="😇🍸")
+    a = j.answer_add(question=q, answer="Santa Oliva")
+    q = j.question_add(game=g, question="©️🕴🐛")
+    a = j.answer_add(question=q, answer="Comarruga")
+    q = j.question_add(game=g, question="😇🌞🍆🥒🧅")
+    a = j.answer_add(question=q, answer="Sant Llorenç d'Hortons")
+    q = j.question_add(game=g, question="🕋🎵🍇")
+    a = j.answer_add(question=q, answer="Torrelavit")
+    q = j.question_add(game=g, question="🌍🌊")
+    a = j.answer_add(question=q, answer="Mediona")
+    q = j.question_add(game=g, question="📈❗️🧶")
+    a = j.answer_add(question=q, answer="Subirats")
+    q = j.question_add(game=g, question="😇🍐👜®️")
+    a = j.answer_add(question=q, answer="Sant Pere Sacarrera")
+    q = j.question_add(game=g, question="😇🍐🌉🎳")
+    a = j.answer_add(question=q, answer="Sant Pere de Riudebitlles")
+    q = j.question_add(game=g, question="🏘🚫🏦🅿️")
+    a = j.answer_add(question=q, answer="Vilafranca del Penedès")
+    q = j.question_add(game=g, question="😇🪐👉👱‍♀")
+    a = j.answer_add(question=q, answer="Sant Sadurní d'Anoia")
+    q = j.question_add(game=g, question="😇5⃣❗️🌍🌊")
+    a = j.answer_add(question=q, answer="Sant Quintí de Mediona")
+    q = j.question_add(game=g, question="😇🏄‍♀🧂")
+    a = j.answer_add(question=q, answer="Sant Marçal")
+    q = j.question_add(game=g, question="🎵🏃‍♀")
+    a = j.answer_add(question=q, answer="La Ràpita")
+    q = j.question_add(game=g, question="🏠⚪️")
+    a = j.answer_add(question=q, answer="Casablanca")
+    q = j.question_add(game=g, question="👉➖🅿️")
+    a = j.answer_add(question=q, answer="El Pla del Penedès")
+    q = j.question_add(game=g, question="😇✝️🅿️")
+    a = j.answer_add(question=q, answer="Santa Fe del Penedès")
+    q = j.question_add(game=g, question="😇🧅🧅🧍‍♀🟡")
+    a = j.answer_add(question=q, answer="Sant Sebastià dels Gorgs")
+    q = j.question_add(game=g, question="🕋💐🌊")
+    a = j.answer_add(question=q, answer="Torreramona")
+    q = j.question_add(game=g, question="🎵⛰🔘")
+    a = j.answer_add(question=q, answer="La Muntanya Rodona")
+    q = j.question_add(game=g, question="♂✔️🔚®️👤")
+    a = j.answer_add(question=q, answer="El Vendrell")
+    q = j.question_add(game=g, question="🏠🔴")
+    a = j.answer_add(question=q, answer="Can Roig")
+    q = j.question_add(game=g, question="☀️🅿️")
+    a = j.answer_add(question=q, answer="Llorenç del Penedès")
+    q = j.question_add(game=g, question="🎵🐝")
+    a = j.answer_add(question=q, answer="L'Avellà")
+    q = j.question_add(game=g, question="🍷🅾️🍷🅿️")
+    a = j.answer_add(question=q, answer="Vilobí del Penedès")
+    q = j.question_add(game=g, question="🎵⛲️🌲🌲🌲")
+    a = j.answer_add(question=q, answer="La Font del Bosc")
+    q = j.question_add(game=g, question="⬆️🏄‍♂")
+    a = j.answer_add(question=q, answer="Daltmar")
+    q = j.question_add(game=g, question="🎵💣🅿️")
+    a = j.answer_add(question=q, answer="La Granada del Penedès")
+    q = j.question_add(game=g, question="🛁🛁🅿️")
+    a = j.answer_add(question=q, answer="Banyeres del Penedès")
+    q = j.question_add(game=g, question="🐶📦")
+    a = j.answer_add(question=q, answer="Can Cartró")
+    q = j.question_add(game=g, question="🗣🎤🦊🦊")
+    a = j.answer_add(question=q, answer="Cantallops")
+    q = j.question_add(game=g, question="🐶🐑🚿🎵🛳")
+    a = j.answer_add(question=q, answer="Can Benet de la Prua")
+    q = j.question_add(game=g, question="⛰🌲")
+    a = j.answer_add(question=q, answer="Puigdàlber")
+    q = j.question_add(game=g, question="🔨👭🏞")
     #a = j.answer_add(question=q, answer="");
-    q = j.question_add(game=g, question="🏠🙎‍♂👤⛰⛰⛰");
-    #a = j.answer_add(question=q, answer="";
+    q = j.question_add(game=g, question="🏠🙎‍♂👤⛰⛰⛰")
+    # a = j.answer_add(question=q, answer="";
 
-    g = j.game_add(name="Bars i restaurants de Sant Sadurní d'Anoia",user=u1)
+    g = j.game_add(name="Bars i restaurants de Sant Sadurní d'Anoia", user=u1)
     #q = j.question_add(game=g, question="");
-    q = j.question_add(game=g, question="🌳");
-    a = j.answer_add(question=q, answer="el pino");
-    q = j.question_add(game=g, question="🥶🥵");
-    a = j.answer_add(question=q, answer="fred i calent");
-    q = j.question_add(game=g, question="🍷👍🏽");
-    a = j.answer_add(question=q, answer="vibop");
-    q = j.question_add(game=g, question="🇽🇹");
-    a = j.answer_add(question=q, answer="dallas");
-    q = j.question_add(game=g, question="🥁");
-    a = j.answer_add(question=q, answer="tabalots");
-    q = j.question_add(game=g, question="🦪");
-    a = j.answer_add(question=q, answer="la perla");
-    q = j.question_add(game=g, question="🍽🍽");
-    q = j.question_add(game=g, question="🤵🏽👌");
-    a = j.answer_add(question=q, answer="selecte");
-    q = j.question_add(game=g, question="🍾🍾🌳");
-    a = j.answer_add(question=q, answer="taps de suro");
-    q = j.question_add(game=g, question="☕️");
-    a = j.answer_add(question=q, answer="el cafè");
-    q = j.question_add(game=g, question="🍱");
-    a = j.answer_add(question=q, answer="homu");
-    q = j.question_add(game=g, question="2⃣2⃣");
-    a = j.answer_add(question=q, answer="el 22");
-    q = j.question_add(game=g, question="🎯");
-    a = j.answer_add(question=q, answer="el centre");
-    q = j.question_add(game=g, question="🦽");
-    a = j.answer_add(question=q, answer="la roda");
-    q = j.question_add(game=g, question="💃🏽💃🏽");
-    a = j.answer_add(question=q, answer="al alandalus");
-    q = j.question_add(game=g, question="🌞🍷");
-    a = j.answer_add(question=q, answer="sol i vi");
-    q = j.question_add(game=g, question="🌯");
-    a = j.answer_add(question=q, answer="donner");
-    q = j.question_add(game=g, question="🏡👴🏼🌊");
-    q = j.question_add(game=g, question="🗣👍");
-    q = j.question_add(game=g, question="👩‍🦯 🥶");
-    a = j.answer_add(question=q, answer="segafredo");
-    q = j.question_add(game=g, question="🏑");
-    a = j.answer_add(question=q, answer="l'Ateneu");
-    q = j.question_add(game=g, question="🤷🏽‍♂🙆🏽‍♀🙅🏼‍♀💁🏽‍♂🧵");
-    q = j.question_add(game=g, question="🔔");
-    a = j.answer_add(question=q, answer="picarol");
-    q = j.question_add(game=g, question="🔔🇮🇹");
-    a = j.answer_add(question=q, answer="il picarolo");
-    q = j.question_add(game=g, question="🌊🤣");
-    q = j.question_add(game=g, question="⛔️");
-    a = j.answer_add(question=q, answer="sentit contrari");
-    q = j.question_add(game=g, question="💐🌾");
-    q = j.question_add(game=g, question="Ⓜ️🐻");
-    a = j.answer_add(question=q, answer="el mos");
-    q = j.question_add(game=g, question="🦄");
-    a = j.answer_add(question=q, answer="Únic");
-    q = j.question_add(game=g, question="🚂");
-    a = j.answer_add(question=q, answer="exprés"); 
-    q = j.question_add(game=g, question="🚂🐱🚬");
-    a = j.answer_add(question=q, answer="exprés del gat cendrer");
-    q = j.question_add(game=g, question="🗝🌞");
-    a = j.answer_add(question=q, answer="Clàudia");
-    q = j.question_add(game=g, question="👀🍾🍾");
-    a = j.answer_add(question=q, answer="mirador caves");
-    q = j.question_add(game=g, question="💰❗️🥬");
-    q = j.question_add(game=g, question="🏠💬ℹ️");
-    q = j.question_add(game=g, question="🏠❄️❄️");
-    a = j.answer_add(question=q, answer="fonda neus");
-    q = j.question_add(game=g, question="👅🤏🏪🚗");
-    q = j.question_add(game=g, question="🌉🇮🇹");
-    a = j.answer_add(question=q, answer="pont romà");
-    q = j.question_add(game=g, question="            ");
-    a = j.answer_add(question=q, answer="Sense nom");
-    q = j.question_add(game=g, question="📆🥂");
-    q = j.question_add(game=g, question="🔼");
-    a = j.answer_add(question=q, answer="triangle");
-    q = j.question_add(game=g, question="🏠❓🧏🏻‍♀❓👉🏼");
-
+    q = j.question_add(game=g, question="🌳")
+    a = j.answer_add(question=q, answer="el pino")
+    q = j.question_add(game=g, question="🥶🥵")
+    a = j.answer_add(question=q, answer="fred i calent")
+    q = j.question_add(game=g, question="🍷👍🏽")
+    a = j.answer_add(question=q, answer="vibop")
+    q = j.question_add(game=g, question="🇽🇹")
+    a = j.answer_add(question=q, answer="dallas")
+    q = j.question_add(game=g, question="🥁")
+    a = j.answer_add(question=q, answer="tabalots")
+    q = j.question_add(game=g, question="🦪")
+    a = j.answer_add(question=q, answer="la perla")
+    q = j.question_add(game=g, question="🍽🍽")
+    q = j.question_add(game=g, question="🤵🏽👌")
+    a = j.answer_add(question=q, answer="selecte")
+    q = j.question_add(game=g, question="🍾🍾🌳")
+    a = j.answer_add(question=q, answer="taps de suro")
+    q = j.question_add(game=g, question="☕️")
+    a = j.answer_add(question=q, answer="el cafè")
+    q = j.question_add(game=g, question="🍱")
+    a = j.answer_add(question=q, answer="homu")
+    q = j.question_add(game=g, question="2⃣2⃣")
+    a = j.answer_add(question=q, answer="el 22")
+    q = j.question_add(game=g, question="🎯")
+    a = j.answer_add(question=q, answer="el centre")
+    q = j.question_add(game=g, question="🦽")
+    a = j.answer_add(question=q, answer="la roda")
+    q = j.question_add(game=g, question="💃🏽💃🏽")
+    a = j.answer_add(question=q, answer="al alandalus")
+    q = j.question_add(game=g, question="🌞🍷")
+    a = j.answer_add(question=q, answer="sol i vi")
+    q = j.question_add(game=g, question="🌯")
+    a = j.answer_add(question=q, answer="donner")
+    q = j.question_add(game=g, question="🏡👴🏼🌊")
+    q = j.question_add(game=g, question="🗣👍")
+    q = j.question_add(game=g, question="👩‍🦯 🥶")
+    a = j.answer_add(question=q, answer="segafredo")
+    q = j.question_add(game=g, question="🏑")
+    a = j.answer_add(question=q, answer="l'Ateneu")
+    q = j.question_add(game=g, question="🤷🏽‍♂🙆🏽‍♀🙅🏼‍♀💁🏽‍♂🧵")
+    q = j.question_add(game=g, question="🔔")
+    a = j.answer_add(question=q, answer="picarol")
+    q = j.question_add(game=g, question="🔔🇮🇹")
+    a = j.answer_add(question=q, answer="il picarolo")
+    q = j.question_add(game=g, question="🌊🤣")
+    q = j.question_add(game=g, question="⛔️")
+    a = j.answer_add(question=q, answer="sentit contrari")
+    q = j.question_add(game=g, question="💐🌾")
+    q = j.question_add(game=g, question="Ⓜ️🐻")
+    a = j.answer_add(question=q, answer="el mos")
+    q = j.question_add(game=g, question="🦄")
+    a = j.answer_add(question=q, answer="Únic")
+    q = j.question_add(game=g, question="🚂")
+    a = j.answer_add(question=q, answer="exprés")
+    q = j.question_add(game=g, question="🚂🐱🚬")
+    a = j.answer_add(question=q, answer="exprés del gat cendrer")
+    q = j.question_add(game=g, question="🗝🌞")
+    a = j.answer_add(question=q, answer="Clàudia")
+    q = j.question_add(game=g, question="👀🍾🍾")
+    a = j.answer_add(question=q, answer="mirador caves")
+    q = j.question_add(game=g, question="💰❗️🥬")
+    q = j.question_add(game=g, question="🏠💬ℹ️")
+    q = j.question_add(game=g, question="🏠❄️❄️")
+    a = j.answer_add(question=q, answer="fonda neus")
+    q = j.question_add(game=g, question="👅🤏🏪🚗")
+    q = j.question_add(game=g, question="🌉🇮🇹")
+    a = j.answer_add(question=q, answer="pont romà")
+    q = j.question_add(game=g, question="            ")
+    a = j.answer_add(question=q, answer="Sense nom")
+    q = j.question_add(game=g, question="📆🥂")
+    q = j.question_add(game=g, question="🔼")
+    a = j.answer_add(question=q, answer="triangle")
+    q = j.question_add(game=g, question="🏠❓🧏🏻‍♀❓👉🏼")
 
     gs = j.game_list_full()
     for g in gs:
         print(str(g.name))
         for q in g.questions:
-            print("q:"+str(q.name))
-            for a in q.answers:
-                print("a:"+str(a.name))
+            print(str(q.position)+" "+q.text +
+                " [" + ', '.join([str(a.text) for a in q.answers])+"]")

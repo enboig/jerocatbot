@@ -10,12 +10,12 @@ from point import Point
 from question import Question
 from user import User
 
-
 config = configparser.ConfigParser()
 config.read('config.ini')
 
 Base.metadata.create_all(engine)
 session = Session()
+
 
 class Jerocat:
     # Game status
@@ -35,11 +35,15 @@ class Jerocat:
         # session = self.session()
         pass
 
-    def answer_check(self, question, answer):
+    def answer_check(self, game, position, answer):
         """
         Checks if an answer is correct
         """
-        return True
+        q = session.query(Question).filter(
+            Question.game == game, Question.position == position).first()
+        ans = session.query(Answer).filter(
+            Answer.question == q, Answer.text.ilike(answer)).first()
+        return ans != None
 
     def user_add(self, uid, name=None, alias=None):
         '''
@@ -72,7 +76,6 @@ class Jerocat:
         session.commit()
         return p
 
-
     def play_get(self, chat_id):
         '''
         Returns the play
@@ -80,14 +83,17 @@ class Jerocat:
 #        s = session.query(Play).get(chat_id=chat_id)
         print("buscant la sessió "+str(chat_id))
         try:
-            p = session.query(Play).filter(Play.chat_id==chat_id).one()
+            p = session.query(Play).filter(Play.chat_id == chat_id).one()
         except:
             p = Play(chat_id=chat_id)
             session.add(p)
             session.commit()
-        print("la sessió trobada és: "+str(p));
+        print("la sessió trobada és: "+str(p))
         return p
-        
+
+    def play_set_game(self, play, game):
+        play.game = game
+        session.commit()
 
     def game_list_full(self, uid=0):
         """
@@ -117,25 +123,26 @@ class Jerocat:
         '''
         Insert a question to the game
         '''
-        q = Question(game=game, name=question)
+        q = Question(game=game, text=question)
         session.add(q)
         session.commit()
         position = session.query(Question).filter(
-            Question.game==q.game).filter(Question.id <= q.id).count()
+            Question.game == q.game).filter(Question.id <= q.id).count()
         setattr(q, 'position', position)
         session.commit()
         return q
 
+    def question_get(self, game, position):
+        return session.query(Question).filter(Question.game == game, Question.position == position).first()
+
     def answer_add(self, question, answer):
-        a = Answer(question=question, name=answer)
+        a = Answer(question=question, text=answer)
         session.add(a)
         session.commit()
         return a
-
 
     def numerize():
         """
         Set the questions numbers
         """
         pass
-

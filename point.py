@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship, backref
 
 from base import Base
 
+
 class Point(Base):
     __tablename__ = 'point'
     id = Column(Integer, primary_key=True)
@@ -31,4 +32,3 @@ class Point(Base):
     #     backref=backref('answer_points',
     #                         uselist=True,
     #                         cascade='delete,all'))
-

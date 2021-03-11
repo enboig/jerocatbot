@@ -7,7 +7,7 @@ from base import Base
 class Answer(Base):
     __tablename__ = 'answer'
     id = Column(Integer, primary_key=True)
-    name = Column(String)
+    text = Column(String)
     # Use default=func.now() to set the default hiring time
     # of an Employee to be the current time when an
     # Employee record was created
@@ -20,7 +20,3 @@ class Answer(Base):
         backref=backref('questions',
                         uselist=True,
                         cascade='delete,all'))
-
-
-
-

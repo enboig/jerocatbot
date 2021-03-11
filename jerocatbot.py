@@ -71,7 +71,7 @@ bot.set_update_listener(listener)  # register listener
 
 def games_choose_markup():
     markup = InlineKeyboardMarkup()
-    markup.row_width = 1
+    markup.row_width = 2
     games = j.game_list_full()
     for g in games:
         markup.add(InlineKeyboardButton(g.name, callback_data=g.id))
@@ -82,16 +82,16 @@ def games_choose_markup():
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
-    g=j.game_get(call.data)
-    if (g==False):
+    print("calllllid: "+str(call))
+    g = j.game_get(call.data)
+    if (g == False):
         print("el joc no existeix")
         bot.answer_callback_query(call.id, "El joc no existeix!")
         return
     bot.answer_callback_query(call.id, "Has escollit "+g.name)
-    print("carreguem la sessió")
+    print("carreguem la sessió de la conversa "+call.id)
     p = j.play_get(call.id)
-    p.set_game = g
-    
+    j.play_set_game(p, g)
 
 
 @bot.message_handler(commands=['games'])

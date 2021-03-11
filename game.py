@@ -4,9 +4,6 @@ from sqlalchemy.orm import relationship, backref
 from base import Base
 
 
-
-
-
 class Game(Base):
     __tablename__ = 'game'
     id = Column(Integer, primary_key=True)
