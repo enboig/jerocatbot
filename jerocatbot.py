@@ -3,6 +3,7 @@ This is a detailed example using almost every command of the API
 """
 
 import time
+import re
 from sqlalchemy.sql.expression import null
 
 import telebot
@@ -82,16 +83,15 @@ def games_choose_markup():
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
-    print("calllllid: "+str(call))
+    call_id = call_get_id(call)
     g = j.game_get(call.data)
     if (g == False):
-        print("el joc no existeix")
-        bot.answer_callback_query(call.id, "El joc no existeix!")
+        bot.answer_callback_query(call_id, "El joc no existeix!")
         return
     bot.answer_callback_query(call.id, "Has escollit "+g.name)
-    print("carreguem la sessió de la conversa "+call.id)
-    p = j.play_get(call.id)
+    p = j.play_get(call_id)
     j.play_set_game(p, g)
+    play_show_status(call_id)
 
 
 @bot.message_handler(commands=['games'])
@@ -103,6 +103,12 @@ def command_games(m):
         j.play_init(cid)
         p = j.play_get(cid)
     bot.send_message(cid, "Escull un joc", reply_markup=games_choose_markup())
+
+
+@bot.message_handler(commands=['status'])
+def command_games(m):
+    chat_id = m.chat.id
+    play_show_status(chat_id)
 
 
 # handle the "/start" command
@@ -184,8 +190,45 @@ def command_text_hi(m):
 @bot.message_handler(func=lambda message: True, content_types=['text'])
 def command_default(m):
     # this is the standard reply to a normal message
-    bot.send_message(m.chat.id, "I don't understand \"" +
-                     m.text + "\"\nMaybe try the help page at /help")
+    if (m.text[:1].isdigit()):
+        posicio, resposta = split_answer(m.text)
+        # print("["+str(posicio)+"]"+" '"+resposta+"'")
+
+    # bot.send_message(m.chat.id, "I don't understand \"" +
+    #                  m.text + "\"\nMaybe try the help page at /help")
+
+
+def split_answer(input):
+    position = int(re.search(r'\d+', input).group())
+    answer = input[len(str(position)):].strip(" .,;-_:")
+    return position, answer
+
+
+def play_show_status(chat_id):
+    p = j.play_get(chat_id)
+    if (p == False):
+        j.play_init(chat_id)
+        p = j.play_get(chat_id)
+    g = j.game_get(p.game_id)
+    if (g == None):
+        bot.send_message(chat_id, "No hi ha cap joc actiu")
+    else:
+        message = g.name+"\n"
+        for q in g.questions:
+            message += str(q.position) + ". "+q.text
+            point = j.points_get(p, q)
+            if (point!=None):
+                message += '"'+p.answer.text+'"'
+            message += "\n"
+        bot.send_message(chat_id, message)
+
+
+def call_get_id(call):
+
+    # id d'un missatge amb teclat rebut
+    call_id = call.message.json["chat"]["id"]
+
+    return call_id
 
 
 bot.polling()

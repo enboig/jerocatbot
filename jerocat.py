@@ -83,12 +83,11 @@ class Jerocat:
 #        s = session.query(Play).get(chat_id=chat_id)
         print("buscant la sessió "+str(chat_id))
         try:
-            p = session.query(Play).filter(Play.chat_id == chat_id).one()
+            p = session.query(Play).filter(Play.chat_id == chat_id).first()
         except:
             p = Play(chat_id=chat_id)
             session.add(p)
             session.commit()
-        print("la sessió trobada és: "+str(p))
         return p
 
     def play_set_game(self, play, game):
@@ -146,3 +145,6 @@ class Jerocat:
         Set the questions numbers
         """
         pass
+
+    def points_get(self, play, question):
+        return session.query(Point).filter(Point.question_id == question.id, Point.play_id == play.id).first()

@@ -13,22 +13,26 @@ class Point(Base):
     created_on = Column(DateTime, default=func.now())
     user_id = Column(Integer, ForeignKey('user.id'))
     game_id = Column(Integer, ForeignKey('game.id'))
+    game = relationship(
+        'Game',
+        backref=backref('game_points',
+                            uselist=True,
+                            cascade='delete,all'))
     question_id = Column(Integer, ForeignKey('question.id'))
+    question = relationship(
+        'Question',
+        backref=backref('question_points',
+                            uselist=True,
+                            cascade='delete,all'))
     answer_id = Column(Integer, ForeignKey('answer.id'))
-    # game = relationship(
-    #     'Game',
-    #     backref=backref('game_points',
-    #                         uselist=True,
-    #                         cascade='delete,all'))
-    # question_id = Column(Integer, ForeignKey('question.id'))
-    # question = relationship(
-    #     'Question',
-    #     backref=backref('question_points',
-    #                         uselist=True,
-    #                         cascade='delete,all'))
-    # answer_id = Column(Integer, ForeignKey('answer.id'))
-    # answer = relationship(
-    #     'Answer',
-    #     backref=backref('answer_points',
-    #                         uselist=True,
-    #                         cascade='delete,all'))
+    answer = relationship(
+        'Answer',
+        backref=backref('answer_points',
+                            uselist=True,
+                            cascade='delete,all'))
+    play_id = Column(Integer, ForeignKey('play.id'))
+    play = relationship(
+        'Play',
+        backref=backref('play_points',
+                            uselist=True,
+                            cascade='delete,all'))
