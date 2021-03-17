@@ -7,10 +7,9 @@ from base import Base
 class User(Base):
     __tablename__ = 'user'
     id = Column(Integer, primary_key=True)
-    uid = Column(Integer, unique=True)
-    name = Column(String, nullable=True)
-    alias = Column(String, nullable=True)
+    username = Column(String)
     created_on = Column(DateTime, default=func.now())
+    updated_on = Column(DateTime, default=func.now())
     # questions = relationship(
     #     'Question',
     #     backref=backref('user-questions',
@@ -27,7 +26,6 @@ class User(Base):
     #                     uselist=True,
     #                     cascade='delete,all'))
 
-    def __init__(self, uid=0, name="", alias=""):
-        self.uid = uid
-        self.name = name
-        self.alias = alias
+    def __init__(self, id=0, username=""):
+        self.id = id
+        self.username = username
