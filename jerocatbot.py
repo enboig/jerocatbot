@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 This is a detailed example using almost every command of the API
 """
@@ -20,6 +21,7 @@ config.read('config.ini')
 
 #from settings import TOKEN
 TOKEN = config['telegram']["TOKEN"]
+ORACULUS = config['telegram']["ORACULUS"]
 
 j = Jerocat()
 
@@ -39,20 +41,6 @@ commands = {  # command description used in the "help" command
 
 # hideBoard = types.ReplyKeyboardRemove()  # if sent as reply_markup, will hide the keyboard
 
-
-# error handling if user isn't known yet
-# (obsolete once known users are saved to file, because all users
-#   had to use the /start command and are therefore known to the bot)
-def get_user_step(uid):
-    if uid in userStep:
-        return userStep[uid]
-    else:
-        knownUsers.append(uid)
-        userStep[uid] = 0
-        print("New user detected, who hasn't used \"/start\" yet")
-        return 0
-
-
 # only used for console output now
 def listener(messages):
     """
@@ -61,8 +49,7 @@ def listener(messages):
     for m in messages:
         if m.content_type == 'text':
             # print the sent message to the console
-            print(str(m.chat.first_name) +
-                  " [" + str(m.chat.id) + "]: " + m.text)
+            print(" [" + str(m.chat.id) + "]: " + m.text)
             # print(str(m.from_user))
 
 
@@ -99,7 +86,6 @@ def command_games(m):
     cid = m.chat.id
     p = j.play_get(cid)
     if (p == False):
-        print("creem sessió...")
         j.play_init(cid)
         p = j.play_get(cid)
     bot.send_message(cid, "Escull un joc", reply_markup=games_choose_markup())
@@ -158,28 +144,6 @@ def command_image(m):
     # set the user to the next step (expecting a reply in the listener now)
     userStep[cid] = 1
 
-
-# if the user has issued the "/getImage" command, process the answer
-@bot.message_handler(func=lambda message: get_user_step(message.chat.id) == 1)
-def msg_image_select(m):
-    cid = m.chat.id
-    text = m.text
-
-    # for some reason the 'upload_photo' status isn't quite working (doesn't show at all)
-    bot.send_chat_action(cid, 'typing')
-
-    if text == 'Mickey':  # send the appropriate image based on the reply to the "/getImage" command
-        bot.send_photo(cid, open('rooster.jpg', 'rb'),
-                       reply_markup=hideBoard)  # send file and hide keyboard, after image is sent
-        userStep[cid] = 0  # reset the users step back to 0
-    elif text == 'Minnie':
-        bot.send_photo(cid, open('kitten.jpg', 'rb'), reply_markup=hideBoard)
-        userStep[cid] = 0
-    else:
-        bot.send_message(cid, "Please, use the predefined keyboard!")
-        bot.send_message(cid, "Please try again")
-
-
 # filter on a specific message
 @bot.message_handler(func=lambda message: message.text == "hi")
 def command_text_hi(m):
@@ -189,13 +153,26 @@ def command_text_hi(m):
 # default handler for every other text
 @bot.message_handler(func=lambda message: True, content_types=['text'])
 def command_default(m):
-    # this is the standard reply to a normal message
+    # check if we have a possible answer
+    chat_id = m.chat.id
+    play = j.play_get(chat_id)
     if (m.text[:1].isdigit()):
-        posicio, resposta = split_answer(m.text)
-        # print("["+str(posicio)+"]"+" '"+resposta+"'")
-
-    # bot.send_message(m.chat.id, "I don't understand \"" +
-    #                  m.text + "\"\nMaybe try the help page at /help")
+        position, answer_text = split_answer(m.text)
+        answer = j.answer_check(play.game, position, answer_text)
+        question = j.question_from_position(play.game, position)
+        if (answer != None):
+            user = m.from_user
+            j.point_add(play, user, question, answer)
+            play_show_status(chat_id)
+        else:
+            # ask for human help....
+            help_112 = "Joc: "+play.game.name+"\nPregunta: " + \
+                question.text+"\nResposta: "+answer_text
+            if (question.answers):
+                help_112 += "\nAltres respostes:"
+                for a in question.answers:
+                    help_112 += "\n - "+a.text
+            bot.send_message(ORACULUS, help_112)
 
 
 def split_answer(input):
@@ -217,8 +194,8 @@ def play_show_status(chat_id):
         for q in g.questions:
             message += str(q.position) + ". "+q.text
             point = j.points_get(p, q)
-            if (point!=None):
-                message += '"'+p.answer.text+'"'
+            if (point != None):
+                message += '"'+point.answer.text+'"'
             message += "\n"
         bot.send_message(chat_id, message)
 
@@ -227,7 +204,6 @@ def call_get_id(call):
 
     # id d'un missatge amb teclat rebut
     call_id = call.message.json["chat"]["id"]
-
     return call_id
 
 

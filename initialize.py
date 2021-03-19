@@ -5,7 +5,7 @@ if __name__ == '__main__':
     j = Jerocat()
 
     # creem usuari
-    u1 = j.user_add(uid=0, name="jerocatbot")
+    u1 = j.user_add(id=0, username="jerocatbot")
 
     # creem dos jocs
     g = j.game_add(name="Pobles i ciutats de Catalunya",
