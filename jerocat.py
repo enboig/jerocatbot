@@ -24,6 +24,8 @@ class Jerocat:
     STATUS_PRIVATE = 2
     STATUS_PENDING = 3
     STATUS_VALIDATING = 4
+    STATUS_VALIDATED = 5
+    
 
     def __init__(self):
         # if (config['database']["engine"] == "sqlite"):
@@ -122,6 +124,10 @@ class Jerocat:
         play.game = game
         session.commit()
 
+    def logout(self, play):
+        play.status = self.STATUS_NOTHING
+        session.commit()
+
     def game_list_full(self, uid=0):
         """
         Returns a list of games. If a user is send, it also list user games
@@ -190,3 +196,25 @@ class Jerocat:
         user = self.user_upsert(user)
         p = Point(play, user, question, answer)
         session.commit()
+    
+    def play_set_attribute(self, chat_id, attribute, value):
+        print ("guardant atribut de partida: "+attribute+" -> "+str(value))
+        p = session.query(Play).filter(Play.chat_id == chat_id).first()
+        print("pre:" + str(p.attributes))
+        p.attributes[attribute] = value
+        session.add(p)
+        session.commit()
+        print("post:" + str(p.attributes))
+        return p
+
+    def save(self):
+        session.commit()
+
+    #get answers from game_id and question_position
+    def answers_list(self, game_id, question_position):
+        question = session.query(Question).filter(Question.game_id == game_id, Question.position == question_position).first()
+        list = {}
+        for a in session.query(Answer).filter(Play.question_id == question.position).all():
+            list[a.id] = a.text
+        return list
+
