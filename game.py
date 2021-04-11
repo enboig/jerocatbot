@@ -13,7 +13,7 @@ class Game(Base):
     user_id = Column(Integer, ForeignKey('user.id'))
     user = relationship(
         'User',
-        backref=backref('users',
+        backref=backref('user',
                         # uselist=True,
                         cascade='delete,all'))
     questions = relationship(

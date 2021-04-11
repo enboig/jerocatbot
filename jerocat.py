@@ -19,9 +19,13 @@ session = Session()
 
 class Jerocat:
     # Game status
+    STATUS_NOTHING = 0
     STATUS_PUBLIC = 1
     STATUS_PRIVATE = 2
     STATUS_PENDING = 3
+    STATUS_VALIDATING = 4
+    STATUS_VALIDATED = 5
+    
 
     def __init__(self):
         # if (config['database']["engine"] == "sqlite"):
@@ -43,16 +47,37 @@ class Jerocat:
             Question.game == game, Question.position == position).first()
         ans = session.query(Answer).filter(
             Answer.question == q, Answer.text.ilike(answer)).first()
-        return ans != None
+        return ans
 
-    def user_add(self, uid, name=None, alias=None):
+    def user_add(self, id, username=None):
         '''
         Insert a user
         '''
-        u = User(uid=uid, name=name, alias=alias)
+        u = User(id=id, username=username)
         session.add(u)
         session.commit()
         return u
+
+    def user_upsert(self, user):
+        new_user = session.query(User).filter(
+            User.id == user.id).first()
+        if (new_user == None):
+            new_user = User(id=user.id, username=user.username)
+            session.add(new_user)
+        else:
+            new_user.username = user.username
+
+        session.commit()
+        return new_user
+
+    def user_get(self, id=False, username=False):
+        user = None
+        if (id != False):
+            user = session.query(User).filter(User.id == id).first()
+        elif (username != False):
+            user = session.query(User).filter(
+                User.username == username).first()
+        return user
 
     def game_add(self, name, user=None, status=0):
         '''
@@ -63,11 +88,16 @@ class Jerocat:
         session.commit()
         return g
 
-    def game_get(self, id, user=None):
+    def game_get(self, id=None, user=None, name=None):
         '''
         Insert a empty game and returns its id
         '''
-        g = session.query(Game).get(id)
+        print("id: " + str(id))
+        g = None
+        if (id != None):
+            g = session.query(Game).get(id)
+        elif (name != None):
+            g = session.query(Game).filter(Game.name == name).first()
         return g
 
     def play_init(self, chat_id):
@@ -81,18 +111,21 @@ class Jerocat:
         Returns the play
         '''
 #        s = session.query(Play).get(chat_id=chat_id)
-        print("buscant la sessió "+str(chat_id))
         try:
-            p = session.query(Play).filter(Play.chat_id == chat_id).one()
-        except:
-            p = Play(chat_id=chat_id)
-            session.add(p)
-            session.commit()
-        print("la sessió trobada és: "+str(p))
+            p = session.query(Play).filter(Play.chat_id == chat_id).first()
+        finally:
+            if (p == None):
+                p = Play(chat_id=chat_id)
+                session.add(p)
+                session.commit()
         return p
 
     def play_set_game(self, play, game):
         play.game = game
+        session.commit()
+
+    def logout(self, play):
+        play.status = self.STATUS_NOTHING
         session.commit()
 
     def game_list_full(self, uid=0):
@@ -132,8 +165,11 @@ class Jerocat:
         session.commit()
         return q
 
-    def question_get(self, game, position):
-        return session.query(Question).filter(Question.game == game, Question.position == position).first()
+    def question_get(self, game, position=None, text=None):
+        if position != None:
+            return session.query(Question).filter(Question.game == game, Question.position == position).first()
+        elif text != None:
+            return session.query(Question).filter(Question.game == game, Question.text == text).first()
 
     def answer_add(self, question, answer):
         a = Answer(question=question, text=answer)
@@ -141,8 +177,44 @@ class Jerocat:
         session.commit()
         return a
 
+    def answer_get(self, question, text):
+        return session.query(Answer).filter(Answer.question == question, Answer.text == text).first()
+
     def numerize():
         """
         Set the questions numbers
         """
         pass
+
+    def points_get(self, play, question):
+        return session.query(Point).filter(Point.question_id == question.id, Point.play_id == play.id).first()
+
+    def question_from_position(self, game, position):
+        return session.query(Question).filter(Question.game_id == game.id, Question.position == position).first()
+
+    def point_add(self, play, user, question, answer):
+        user = self.user_upsert(user)
+        p = Point(play, user, question, answer)
+        session.commit()
+    
+    def play_set_attribute(self, chat_id, attribute, value):
+        print ("guardant atribut de partida: "+attribute+" -> "+str(value))
+        p = session.query(Play).filter(Play.chat_id == chat_id).first()
+        print("pre:" + str(p.attributes))
+        p.attributes[attribute] = value
+        session.add(p)
+        session.commit()
+        print("post:" + str(p.attributes))
+        return p
+
+    def save(self):
+        session.commit()
+
+    #get answers from game_id and question_position
+    def answers_list(self, game_id, question_position):
+        question = session.query(Question).filter(Question.game_id == game_id, Question.position == question_position).first()
+        list = {}
+        for a in session.query(Answer).filter(Play.question_id == question.position).all():
+            list[a.id] = a.text
+        return list
+
