@@ -28,9 +28,6 @@ ADMIN_PASSWORD = config['main']["password"]
 
 j = Jerocat()
 
-knownUsers = []  # todo: save these in a file,
-userStep = {}  # so they won't reset every time the bot restarts
-
 commands = {  # command description used in the "help" command
     'games': 'Llista de jocs disponibles per activar',
     'punts': 'Mostra quants punts té cada usuari',
@@ -38,22 +35,22 @@ commands = {  # command description used in the "help" command
     #    'getImage'    : 'A test using multi-stage messages, custom keyboard, and media sending'
 }
 
+# https://github.com/eternnoir/pyTelegramBotAPI/issues/880
+#bot = telebot.TeleBot(TOKEN)
+bot = telebot.TeleBot(TOKEN, threaded=False)
+
 # only used for console output now
+# def listener(messages):
+#     """
+#     When new messages arrive TeleBot will call this function.
+#     """
+#     for m in messages:
+#         if m.content_type == 'text':
+#             # print the sent message to the console
+#             print(" [" + str(m.chat.id) + "]: " + m.text)
+#             # print(str(m.from_user))
 
-
-def listener(messages):
-    """
-    When new messages arrive TeleBot will call this function.
-    """
-    for m in messages:
-        if m.content_type == 'text':
-            # print the sent message to the console
-            print(" [" + str(m.chat.id) + "]: " + m.text)
-            # print(str(m.from_user))
-
-
-bot = telebot.TeleBot(TOKEN)
-bot.set_update_listener(listener)  # register listener
+# bot.set_update_listener(listener)  # register listener
 
 '''
 COMMANDS
@@ -86,10 +83,18 @@ def command_edit(m):
     if p.attributes.get("editing", False) != True:
         p.status = Jerocat.STATUS_VALIDATING
         j.save()
-        bot.send_message(chat_id, "Entra la contrasenya d'editor")
+        bot.send_message(chat_id, "Entra la contrasenya d'editor",
+                         disable_notification=True)
     else:
         questions_edit_menu(chat_id)
 # exits editing mode
+
+
+@bot.message_handler(commands=['run'])
+def command_help(m):
+    chat_id = m.chat.id
+    p = j.play_get(chat_id)
+    j.play_get_ranking(p)
 
 
 @bot.message_handler(commands=['logout'])
@@ -103,7 +108,7 @@ def command_help(m):
 
     j.save()  # TODO check if disabling this works
 
-    bot.send_message(chat_id, "Logged out")
+    bot.send_message(chat_id, "Logged out", disable_notification=True)
 
 
 # help page
@@ -114,7 +119,8 @@ def command_help(m):
     for key in commands:  # generate help text out of the commands dictionary defined at the top
         help_text += "/" + key + ": "
         help_text += commands[key] + "\n"
-    bot.send_message(chat_id, help_text)  # send the generated help page
+    # send the generated help page
+    bot.send_message(chat_id, help_text, disable_notification=True)
 
 
 '''
@@ -140,51 +146,6 @@ def callback_query(call):
             answers_edit_menu_response(p, call)
         elif p.status == j.STATUS_EDITING_QUESTION_TEXT:
             question_delete_menu_response(play=p, call=call)
-
-        ########################################
-        ##### OLD DEPRECATED ###################
-        ########################################
-        # bot.delete_message(
-        #     call.message.json["chat"]["id"], call.message.message_id)
-        # if param[0] == "g":
-        #     g = j.game_get(param[1])
-        #     if (g == False):
-        #         bot.answer_callback_query(chat_id, "El joc no existeix!")
-        #         return
-        #     bot.answer_callback_query(call.id, "Has escollit "+g.name)
-
-        #     j.play_set_game(p, g)
-        #     if p.status == Jerocat.STATUS_VALIDATED:
-        #         questions_edit_menu(chat_id)
-        #     else:
-        #         play_show_status(chat_id)
-        # if param[0] == "qe":  # estem passant una pregunta a editar
-        #     q = j.question_get(id=int(param[1]))
-        #     p.status = Jerocat.STATUS_EDITING_QUESTIONS
-        #     p.attributes["question_id"] = q.id
-        #     j.save()
-        #     # mostrem el menú per editar o esborrar la pregunta
-        #     question_edit_message(chat_id, q)
-        # if param[0] == "qd":  # estem esborrant una pregunta
-        #     p.status = Jerocat.STATUS_VALIDATED
-        #     p.attributes.pop("question_id")
-        #     j.save()
-        #     q = j.question_get(id=param[1])
-
-        #     j.question_delete(id=param[1])
-        #     j.save()
-        #     # mostrem el menú informant de la pregunta esborrada
-        #     bot.send_message(
-        #         chat_id, "S'ha esborrat la pregunta "+str(q.position)+" "+str(q.text))
-        # if param[0] == "qae":  # estem editant respostes....
-        #     q = j.question_get(id=int(param[1]))
-        #     p.status = Jerocat.STATUS_EDITING_ANSWERS
-        #     p.attributes["question_id"] = q.id
-        #     j.save()
-        #     # mostrem el menú per editar o esborrar la pregunta
-        #     answer_edit_menu(chat_id, q)
-        # if param[0] == "0":
-        #     menu_cancel(call)
         else:
             print("No sé quina comanda de menú he rebut?!?!?!?!?")
             print("p.status:"+(p.status))
@@ -229,6 +190,7 @@ def command_default(m):
 
     else:
         if (m.text[:1].isdigit()):
+            print(str(m))
             check_answer(m)
 
 
@@ -255,7 +217,8 @@ def play_show_status(chat_id):
         p = j.play_get(chat_id)
     g = j.game_get(p.game_id)
     if (g == None):
-        bot.send_message(chat_id, "No hi ha cap joc actiu")
+        bot.send_message(chat_id, "No hi ha cap joc actiu",
+                         disable_notification=True)
     else:
         message = g.name+"\n"
         for q in g.questions:
@@ -264,7 +227,14 @@ def play_show_status(chat_id):
             if (point != None):
                 message += '"'+point.answer.text+'"'
             message += "\n"
-        bot.send_message(chat_id, message)
+        rank = j.play_get_ranking(p)
+        if (len(rank) > 0):
+            message += "Ranking:\n"
+            for uid, points in rank.items():
+                u = j.user_get(uid)
+                message += str(points) + " -> " + ((u.first_name+" "+u.last_name)
+                                                   if len(u.first_name+u.last_name) else u.username)+"\n"
+        bot.send_message(chat_id, message, disable_notification=True)
 
 
 def call_get_id(call):
@@ -282,14 +252,17 @@ def login(m):
         play.attributes['editing'] = True
         j.save()
         bot.delete_message(m.chat.id, m.message_id)
-        bot.send_message(chat_id, "Contrasenya acceptada")
+        bot.send_message(chat_id, "Contrasenya acceptada",
+                         disable_notification=True)
         bot.send_message(
-            chat_id, "Activa un joc amb /games i introdueix un número per editar pregunta i resposta (0 per a inserir-ne una...)")
+            chat_id, "Activa un joc amb /games i introdueix un número per editar pregunta i resposta (0 per a inserir-ne una...)",
+            disable_notification=True)
     else:
         play.status = Jerocat.STATUS_NOTHING
         j.save()
         bot.delete_message(m.chat.id, m.message_id)
-        bot.send_message(chat_id, "Contrasenya INCORRECTA")
+        bot.send_message(chat_id, "Contrasenya INCORRECTA",
+                         disable_notification=True)
 
 
 # generates questions markup for edit
@@ -338,9 +311,9 @@ def editing(m):
 
 def answer_edit_menu(chat_id, question):
     bot.send_message(chat_id, "Editant respostes de "+question.text,
-                     reply_markup=answers_edit_markup(question))
+                     reply_markup=answers_edit_markup(question), disable_notification=True)
     bot.send_message(
-        chat_id, "Escull una resposta per editar, o escriu-ne un de nova")
+        chat_id, "Escull una resposta per editar, o escriu-ne un de nova", disable_notification=True)
 
 
 def answers_edit_markup(question):
@@ -395,7 +368,7 @@ def answers_edit_menu_response(play, call):
 
 def question_edit_message(chat_id, question):
     bot.send_message(chat_id, "Reescriu la pregunta, o prem per esborrar",
-                     reply_markup=question_delete_markup(chat_id, question))
+                     reply_markup=question_delete_markup(chat_id, question), disable_notification=True)
 
 
 def question_delete_markup(chat_id, question):
@@ -451,7 +424,7 @@ def menu_cancel(play, call):
 def questions_edit_menu(chat_id):
     p = j.play_get(chat_id)
     bot.send_message(chat_id, "Escull pregunta per editar, o tecleja'n una de nova",
-                     reply_markup=question_edit_markup(p))
+                     reply_markup=question_edit_markup(p), disable_notification=True)
 
 
 def games_menu(chat_id):
@@ -489,7 +462,8 @@ def game_menu_response(play, call):
             bot.answer_callback_query(play.chat_id, "El joc no existeix!")
             return
 
-        bot.send_message(play.chat_id, "Has escollit " + g.name)
+        bot.send_message(play.chat_id, "Has escollit " +
+                         g.name, disable_notification=True)
 
         try:
             bot.delete_message(
@@ -507,7 +481,8 @@ def game_menu_response(play, call):
             j.save()
             play_show_status(play.chat_id)
     else:
-        bot.send_message(play.chat_id, "Opció incorrecta")
+        bot.send_message(play.chat_id, "Opció incorrecta",
+                         disable_notification=True)
 
 
 def questions_edit_menu_response(play, call):

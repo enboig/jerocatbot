@@ -1,5 +1,6 @@
 from datetime import date
-from base import Session, engine, Base
+from base import Session, engine, Base, metadata
+from sqlalchemy import create_engine, select, MetaData, Table, and_
 
 import configparser
 
@@ -66,16 +67,21 @@ class Jerocat:
         return u
 
     def user_upsert(self, user):
-        new_user = session.query(User).filter(
+        u = session.query(User).filter(
             User.id == user.id).first()
-        if (new_user == None):
-            new_user = User(id=user.id, username=user.username)
-            session.add(new_user)
+        if (u == None):
+            u = User(id=user.id,
+                     username=user.username,
+                     first_name=user.first_name,
+                     last_name=user.last_name)
+            session.add(u)
         else:
-            new_user.username = user.username
+            u.username = user.username
+            u.first_name = user.first_name
+            u.last_name = user.last_name
 
         session.commit()
-        return new_user
+        return u
 
     def user_get(self, id=False, username=False):
         user = None
@@ -211,7 +217,7 @@ class Jerocat:
         pass
 
     def points_get(self, play, question):
-        return session.query(Point).filter(Point.question_id == question.id, Point.play_id == play.id).first()
+        return session.query(Point).filter(Point.question_id == question.id, Point.play_id == play.id).order_by(Point.created_on).first()
 
     def question_from_position(self, game, position):
         return session.query(Question).filter(Question.game_id == game.id, Question.position == position).first()
@@ -239,3 +245,15 @@ class Jerocat:
         for a in session.query(Answer).filter(Play.question_id == question.position).all():
             list[a.id] = a.text
         return list
+
+    def play_get_ranking(self, play):
+        '''
+        Retuns a dictionari with player names/users and correct (first) answers
+        '''
+        checked = {}
+        result = {}
+        for p, u in session.query(Point, User).filter(Point.user_id == User.id, Play.game == play.game, Point.play == play).order_by(Point.created_on):
+            if checked.get(p.question_id) is None:
+                result[u.id] = result.get(u.id, 0)+1
+                checked[p.question_id] = True
+        return result

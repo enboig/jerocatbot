@@ -46,7 +46,7 @@ else:
     _DB_URI = 'sqlite://'
 
 engine = create_engine(_DB_URI)
-
+metadata = MetaData(bind=None)
 
 #Session = sessionmaker(bind=engine)
 session_factory = sessionmaker(bind=engine)
