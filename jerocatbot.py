@@ -12,6 +12,10 @@ from telebot import types
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from telebot.util import is_string
 
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
 from jerocat import Jerocat
 
 
@@ -25,19 +29,20 @@ TOKEN = config['telegram']["TOKEN"]
 ORACULUS = config['telegram']["ORACULUS"]
 ADMIN_PASSWORD = config['main']["password"]
 # telebot.apihelper.READ_TIMEOUT = 5
+MAIL_USER = config['mail']["user"]
+MAIL_PASSWORD = config['mail']["passowrd"]
+MAIL_ADMIN = config['mail']["admin"]
 
 j = Jerocat()
 
 commands = {  # command description used in the "help" command
     'games': 'Llista de jocs disponibles per activar',
-    'punts': 'Mostra quants punts té cada usuari',
-    'mostra': 'Mostra els jeroglífics (els solucionats amb la solució)',
-    #    'getImage'    : 'A test using multi-stage messages, custom keyboard, and media sending'
+    'status': 'Mostra com està la partida, i quins jeroglífics ja han sigut resoltrs',
 }
 
 # https://github.com/eternnoir/pyTelegramBotAPI/issues/880
-#bot = telebot.TeleBot(TOKEN)
-bot = telebot.TeleBot(TOKEN, threaded=False)
+bot = telebot.TeleBot(TOKEN)
+#bot = telebot.TeleBot(TOKEN, threaded=False)
 
 # only used for console output now
 # def listener(messages):
@@ -88,13 +93,6 @@ def command_edit(m):
     else:
         questions_edit_menu(chat_id)
 # exits editing mode
-
-
-@bot.message_handler(commands=['run'])
-def command_help(m):
-    chat_id = m.chat.id
-    p = j.play_get(chat_id)
-    j.play_get_ranking(p)
 
 
 @bot.message_handler(commands=['logout'])
@@ -263,6 +261,7 @@ def login(m):
         bot.delete_message(m.chat.id, m.message_id)
         bot.send_message(chat_id, "Contrasenya INCORRECTA",
                          disable_notification=True)
+        mail_send("","Hi ha hagut un intent fallit d'entrar al gestor del JeroCatBot!\n"+str(m))
 
 
 # generates questions markup for edit
@@ -549,6 +548,27 @@ def clear_menus(play):
         else:
             break
     j.save()
+
+def mail_send(to, mail_content):
+    #The mail addresses and password
+    sender_address = MAIL_USER
+    sender_pass = MAIL_PASSWORD
+    receiver_address = 'enboig@gmail.com'
+    #Setup the MIME
+    message = MIMEMultipart()
+    message['From'] = sender_address
+    message['To'] = to
+    message['Subject'] = 'A test mail sent by Python. It has an attachment.'   #The subject line
+    #The body and the attachments for the mail
+    message.attach(MIMEText(mail_content, 'plain'))
+    #Create SMTP session for sending the mail
+    session = smtplib.SMTP('smtp.gmail.com', 587) #use gmail with port
+    session.starttls() #enable security
+    session.login(sender_address, sender_pass) #login with mail_id and password
+    text = message.as_string()
+    session.sendmail(sender_address, receiver_address, text)
+    session.quit()
+    print('Mail Sent')
 
 
 bot.polling()
