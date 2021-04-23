@@ -1,0 +1,7 @@
+sqlalchemy_mutable==0.0.13
+pyexcel_ods==0.6.0
+SQLAlchemy==1.3.23
+pyexcel==0.6.6
+PyMySQL==1.0.2
+requests==2.22.0
+pyTelegramBotAPI==3.7.7

@@ -20,5 +20,6 @@ class Game(Base):
         'Question',
         backref=backref('question',
                         uselist=True,
-                        cascade='delete,all'))
+                        # cascade='delete,all'
+                        ))
     plays = relationship("Play", back_populates="game")

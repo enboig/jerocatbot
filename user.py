@@ -8,6 +8,8 @@ class User(Base):
     __tablename__ = 'user'
     id = Column(Integer, primary_key=True)
     username = Column(String)
+    first_name = Column(String)
+    last_name = Column(String)
     created_on = Column(DateTime, default=func.now())
     updated_on = Column(DateTime, default=func.now())
     # questions = relationship(
@@ -26,6 +28,8 @@ class User(Base):
     #                     uselist=True,
     #                     cascade='delete,all'))
 
-    def __init__(self, id=0, username=""):
+    def __init__(self, id=0, username="", first_name="", last_name=""):
         self.id = id
         self.username = username
+        self.first_name = first_name
+        self.last_name = last_name

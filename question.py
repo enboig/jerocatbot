@@ -20,7 +20,8 @@ class Question(Base):
         'Game',
         backref=backref('games',
                         uselist=True,
-                        cascade='delete,all'))
+                        # cascade='delete,all'
+                        ))
     answers = relationship(
         'Answer',
         backref=backref('answer',

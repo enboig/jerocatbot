@@ -1,5 +1,6 @@
 from datetime import date
-from base import Session, engine, Base
+from base import Session, engine, Base, metadata
+from sqlalchemy import create_engine, select, MetaData, Table, and_
 
 import configparser
 
@@ -25,7 +26,14 @@ class Jerocat:
     STATUS_PENDING = 3
     STATUS_VALIDATING = 4
     STATUS_VALIDATED = 5
-    
+    STATUS_EDITING_QUESTIONS = 6
+    STATUS_EDITING_ANSWERS = 7
+    STATUS_EDITING_QUESTION_TEXT = 8
+    STATUS_EDITING_ANSWER_TEXT = 9
+
+    STATUS_GAMES_MENU = 10
+    STATUS_GAME_EDIT = 11
+    STATUS_GAME_PLAY = 12
 
     def __init__(self):
         # if (config['database']["engine"] == "sqlite"):
@@ -59,16 +67,21 @@ class Jerocat:
         return u
 
     def user_upsert(self, user):
-        new_user = session.query(User).filter(
+        u = session.query(User).filter(
             User.id == user.id).first()
-        if (new_user == None):
-            new_user = User(id=user.id, username=user.username)
-            session.add(new_user)
+        if (u == None):
+            u = User(id=user.id,
+                     username=user.username,
+                     first_name=user.first_name,
+                     last_name=user.last_name)
+            session.add(u)
         else:
-            new_user.username = user.username
+            u.username = user.username
+            u.first_name = user.first_name
+            u.last_name = user.last_name
 
         session.commit()
-        return new_user
+        return u
 
     def user_get(self, id=False, username=False):
         user = None
@@ -92,7 +105,6 @@ class Jerocat:
         '''
         Insert a empty game and returns its id
         '''
-        print("id: " + str(id))
         g = None
         if (id != None):
             g = session.query(Game).get(id)
@@ -122,10 +134,6 @@ class Jerocat:
 
     def play_set_game(self, play, game):
         play.game = game
-        session.commit()
-
-    def logout(self, play):
-        play.status = self.STATUS_NOTHING
         session.commit()
 
     def game_list_full(self, uid=0):
@@ -165,11 +173,33 @@ class Jerocat:
         session.commit()
         return q
 
-    def question_get(self, game, position=None, text=None):
-        if position != None:
+    def question_get(self, game=None, position=None, text=None, id=None):
+        if id != None:
+            return session.query(Question).filter(Question.id == int(id)).first()
+        elif position != None:
             return session.query(Question).filter(Question.game == game, Question.position == position).first()
         elif text != None:
             return session.query(Question).filter(Question.game == game, Question.text == text).first()
+
+    def question_delete(self, game=None, position=None, text=None, id=None):
+        if id != None:
+            session.query(Question).filter(Question.id == int(id)).delete()
+            session.query(Answer).filter(
+                Answer.question_id == int(id)).delete()
+            session.query(Point).filter(Point.question_id == int(id)).delete()
+            session.commit()
+            # q=session.query(Question).filter(Question.id == int(id)).first()
+            # session.delete(q)
+        elif position != None:
+            pass
+        elif text != None:
+            pass
+        # TODO: refer els índexs
+
+    def question_update(self, id=None, text=None):
+        q = self.question_get(id=id)
+        q.text = text
+        session.commit()
 
     def answer_add(self, question, answer):
         a = Answer(question=question, text=answer)
@@ -180,6 +210,12 @@ class Jerocat:
     def answer_get(self, question, text):
         return session.query(Answer).filter(Answer.question == question, Answer.text == text).first()
 
+    def answer_delete(self, id):
+        if id != None:
+            session.query(Answer).filter(Answer.id == int(id)).delete()
+            session.query(Point).filter(Point.answer_id == int(id)).delete()
+            session.commit()
+
     def numerize():
         """
         Set the questions numbers
@@ -187,7 +223,7 @@ class Jerocat:
         pass
 
     def points_get(self, play, question):
-        return session.query(Point).filter(Point.question_id == question.id, Point.play_id == play.id).first()
+        return session.query(Point).filter(Point.question_id == question.id, Point.play_id == play.id).order_by(Point.created_on).first()
 
     def question_from_position(self, game, position):
         return session.query(Question).filter(Question.game_id == game.id, Question.position == position).first()
@@ -196,25 +232,35 @@ class Jerocat:
         user = self.user_upsert(user)
         p = Point(play, user, question, answer)
         session.commit()
-    
+
     def play_set_attribute(self, chat_id, attribute, value):
-        print ("guardant atribut de partida: "+attribute+" -> "+str(value))
         p = session.query(Play).filter(Play.chat_id == chat_id).first()
-        print("pre:" + str(p.attributes))
         p.attributes[attribute] = value
         session.add(p)
         session.commit()
-        print("post:" + str(p.attributes))
         return p
 
     def save(self):
         session.commit()
 
-    #get answers from game_id and question_position
+    # get answers from game_id and question_position
     def answers_list(self, game_id, question_position):
-        question = session.query(Question).filter(Question.game_id == game_id, Question.position == question_position).first()
+        question = session.query(Question).filter(
+            Question.game_id == game_id, Question.position == question_position).first()
         list = {}
         for a in session.query(Answer).filter(Play.question_id == question.position).all():
             list[a.id] = a.text
         return list
 
+    def play_get_ranking(self, play):
+        '''
+        Retuns a dictionari with player names/users and correct (first) answers
+        '''
+        checked = {}
+        result = {}
+#        for p, u in session.query(Point, User).filter(Point.user_id == User.id, Play.game == play.game, Point.play == play).order_by(Point.created_on):
+        for p in session.query(Point).join(Game).join(User, Point.user).filter(Point.play == play, Point.game == play.game).order_by(Point.created_on):
+            if checked.get(p.question_id) is None:
+                result[p.user_id] = result.get(p.user_id, 0)+1
+                checked[p.question_id] = True
+        return result

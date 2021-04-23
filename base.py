@@ -1,6 +1,8 @@
 # coding=utf-8
 
 #from sqlalchemy import *
+import configparser
+from sqlalchemy.orm import scoped_session
 import pymysql
 from sqlalchemy import *
 from sqlalchemy import create_engine
@@ -29,9 +31,6 @@ SIZE = 256
 #             value = json.loads(value)
 #         return value
 
-        
-from sqlalchemy.orm import scoped_session
-import configparser
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -40,13 +39,16 @@ if (config['database']["engine"] == "sqlite"):
     _DB_URI = 'sqlite:///' + \
         config['database']["database"]+'.sqlite'+"?check_same_thread=False"
 elif (config['database']["engine"] == "mariadb"):
-    _DB_URI = "mariadb+pymsql://"+config['database']["user"]+":"+config['database']["user"]+"@"+config['database']["host"]+"/"+config['database']["database"]+"?charset=utf8mb4"
+    _DB_URI = "mariadb+pymsql://"+config['database']["user"]+":"+config['database']["user"] + \
+        "@"+config['database']["host"]+"/" + \
+        config['database']["database"]+"?charset=utf8mb4"
 else:
     print("volatile database")
     _DB_URI = 'sqlite://'
 
 engine = create_engine(_DB_URI)
-
+#engine = create_engine(_DB_URI,echo=True,)
+metadata = MetaData(bind=None)
 
 #Session = sessionmaker(bind=engine)
 session_factory = sessionmaker(bind=engine)

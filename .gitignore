@@ -3,8 +3,8 @@ jerocatbot.db
 __pycache__/
 jerocat.sqlite
 database.sqlite
-aaa.txt
-aaa.json
-minibot.py
+*.json
 .gitignore
 bbb.json
+dev_notes.md
+*.pyc
