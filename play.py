@@ -24,7 +24,6 @@ class Play(Base):
     chat_id = Column(Integer, unique=True)
     editor_enabled = Column(Boolean, default=False)
     status = Column(Integer, default=0)
-#    saved_Data = Column(TextPickleType(),default={})
     attributes = Column(MutableType)
 #    menus = Column(MutableType)
     created_on = Column(DateTime, default=func.now())

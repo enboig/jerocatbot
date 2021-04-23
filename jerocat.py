@@ -184,12 +184,17 @@ class Jerocat:
     def question_delete(self, game=None, position=None, text=None, id=None):
         if id != None:
             session.query(Question).filter(Question.id == int(id)).delete()
+            session.query(Answer).filter(
+                Answer.question_id == int(id)).delete()
+            session.query(Point).filter(Point.question_id == int(id)).delete()
+            session.commit()
+            # q=session.query(Question).filter(Question.id == int(id)).first()
+            # session.delete(q)
         elif position != None:
             pass
         elif text != None:
             pass
         # TODO: refer els índexs
-        session.commit()
 
     def question_update(self, id=None, text=None):
         q = self.question_get(id=id)
@@ -208,7 +213,8 @@ class Jerocat:
     def answer_delete(self, id):
         if id != None:
             session.query(Answer).filter(Answer.id == int(id)).delete()
-        session.commit()
+            session.query(Point).filter(Point.answer_id == int(id)).delete()
+            session.commit()
 
     def numerize():
         """
@@ -252,8 +258,9 @@ class Jerocat:
         '''
         checked = {}
         result = {}
-        for p, u in session.query(Point, User).filter(Point.user_id == User.id, Play.game == play.game, Point.play == play).order_by(Point.created_on):
+#        for p, u in session.query(Point, User).filter(Point.user_id == User.id, Play.game == play.game, Point.play == play).order_by(Point.created_on):
+        for p in session.query(Point).join(Game).join(User, Point.user).filter(Point.play == play, Point.game == play.game).order_by(Point.created_on):
             if checked.get(p.question_id) is None:
-                result[u.id] = result.get(u.id, 0)+1
+                result[p.user_id] = result.get(p.user_id, 0)+1
                 checked[p.question_id] = True
         return result

@@ -11,7 +11,6 @@ if __name__ == '__main__':
     # creem usuari
     u1 = j.user_add(id=0, username="jerocatbot")
 
-
     # creem jocs
     for ng in range(10):
         g = j.game_add(name="g"+str(ng), user=u1, status=j.STATUS_PUBLIC)
@@ -22,11 +21,10 @@ if __name__ == '__main__':
 
     gs = j.game_list()
 
-
-    for n in range(40,randint(40,100)):
+    for n in range(40, randint(40, 100)):
         g = j.game_get(randint(1, len(gs)))
         for n in range(randint(10, 20)):
-            #intentem una respostes
+            # intentem una respostes
             for a in range(4*len(g.questions)):
                 j.answer_check(g, 1, a)
 
@@ -34,4 +32,3 @@ if __name__ == '__main__':
 #     for q in g.questions:
 #         print(str(q.id)+" "+q.text +
 #               " [" + ', '.join([str(a.text) for a in q.answers])+"]")
-    
