@@ -39,8 +39,8 @@ class Play(Base):
 #        self.menus = Mutable()
 #        self.menus = []
 
-    def get(self, attribute):
-        return self.attributes.get(attribute, None)
+    def get(self, attribute, default_value=None):
+        return self.attributes.get(attribute, default_value)
 
     def set(self, attribute, value):
         self.attributes[attribute] = value

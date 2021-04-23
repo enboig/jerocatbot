@@ -43,7 +43,7 @@ commands = {  # command description used in the "help" command
     'status': 'Mostra com està la partida, i quins jeroglífics ja han sigut resoltrs',
 }
 
-commands_single = {  # command description used in the "help" command
+commands_private = {  # command description used in the "help" command
     'games': 'Llista de jocs disponibles per activar',
     'edit': 'Entra en mode editor',
     'logout': 'Surt del mode editor'
@@ -81,7 +81,7 @@ def command_edit(m):
         reply_to(m, "Només es poden editar jocs per converses privades")
         return
     p = j.play_get(chat_id)
-    if p.attributes.get("editing", False) != True:
+    if p.get("editing", False) != True:
         p.status = Jerocat.STATUS_VALIDATING
         j.save()
         send_message(chat_id, "Entra la contrasenya d'editor",
@@ -107,11 +107,14 @@ def command_logout(m):
 def command_help(m):
     chat_id = m.chat.id
     help_text = "Escull una comanda: \n"
-#    for key in (commands if m.chat.type=="private" else commands_single):  # generate help text out of the commands dictionary defined at the top
-    for key in commands:  # generate help text out of the commands dictionary defined at the top
-        help_text += "/" + key + ": "
-        help_text += commands[key] + "\n"
-    # send the generated help page
+    if m.chat.type=="private":
+        for key in commands_private:  # generate help text out of the commands dictionary defined at the top
+            help_text += "/" + key + ": "
+            help_text += commands_private[key] + "\n"
+    else:
+        for key in commands:  # generate help text out of the commands dictionary defined at the top
+            help_text += "/" + key + ": "
+            help_text += commands[key] + "\n"
     send_message(chat_id, help_text, disable_notification=True)
 
 # Downloads a ODS file with all games
@@ -148,7 +151,8 @@ def callback_query(call):
             question_delete_menu_response(play=p, call=call)
         else:
             print("Unknown command")
-            print("p.status:"+(p.status))
+            print("p.status:"+str(p.status))
+            print("call:"+str(call))
         if ok == False:
             # mostrem de nou el menú esperat
             pass
@@ -350,7 +354,7 @@ def answers_edit_menu_response(play, call):
         if param[0] == "qae":  # estem editant respostes....
             q = j.question_get(id=int(param[1]))
             play.status = Jerocat.STATUS_EDITING_ANSWERS
-            play.attributes.set("question_id", q.id)
+            play.set("question_id", q.id)
             j.save()
             # mostrem el menú per editar o esborrar la pregunta
             answer_edit_menu(play.chat_id, q)
