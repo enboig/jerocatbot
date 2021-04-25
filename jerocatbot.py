@@ -290,20 +290,26 @@ def question_edit_markup(play):
     markup = InlineKeyboardMarkup()
     markup.row_width = 2
     game = j.game_get(id=play.game.id)
+    pag = int(play.get("pag", 0))
+    i = 0
     for q in game.questions:
-        # question button
-        buton_q = "qe_" + str(q.id)
-        # answer button
-        buton_a = "qae_" + str(q.id)
-        answers_txt = "+++ add answer +++"
-        if len(q.answers):
-            answers_txt = ""
-            for a in q.answers:
-                answers_txt += a.text+", "
+        i += 1
+        if (int(i/10) == pag):
+            # question button
+            buton_q = "qe_" + str(q.id)
+            # answer button
+            buton_a = "qae_" + str(q.id)
+            answers_txt = "+++ add answer +++"
+            if len(q.answers):
+                answers_txt = ""
+                for a in q.answers:
+                    answers_txt += a.text+", "
 
-            answers_txt = answers_txt[:-2]
-        markup.add(InlineKeyboardButton(q.text, callback_data=buton_q),
-                   InlineKeyboardButton(answers_txt, callback_data=buton_a))
+                answers_txt = answers_txt[:-2]
+            markup.add(InlineKeyboardButton(q.text, callback_data=buton_q),
+                       InlineKeyboardButton(answers_txt, callback_data=buton_a))
+    markup.add(InlineKeyboardButton("<--Pàg", callback_data="pag_pre"),
+               InlineKeyboardButton("Pàg-->", callback_data="pag_post"))
     markup.add(InlineKeyboardButton("Cancel·la", callback_data="0"),
                InlineKeyboardButton("Esborra el joc", callback_data="gd"))
 
@@ -441,6 +447,7 @@ def games_menu(chat_id):
     p = j.play_get(chat_id)
     p.status = j.STATUS_GAMES_MENU
     p.unset("question_id")
+    p.unset('pag')
     j.save()
     send_message(chat_id, "Escull un joc",
                  reply_markup=games_menu_markup(), disable_notification=True)
@@ -507,13 +514,22 @@ def questions_edit_menu_response(play, call):
             j.save()
             # mostrem el menú per editar o esborrar la pregunta
             answer_edit_menu(play.chat_id, q)
+        elif param[0] == "pag":  # Cancel
+            pag = int(play.get("pag", 0))
+            if param[1] == "pre":
+                pag = max(pag-1, 0)
+            else:
+                pag = min(pag+1, int(len(play.game.questions)/10))
+
+            play.set("pag", int(pag))
+            j.save()
+            questions_edit_menu(play.chat_id)
         elif param[0] == "0":  # Cancel
             play.status = Jerocat.STATUS_VALIDATED
             j.save()
             # TODO estem cancel·lant l'edició d'una resposta
             games_menu(play.chat_id)
         elif param[0] == "gd":  # Esborrant un joc!!!!
-            print("Esborraré un joc!!!!")
             if j.game_delete(play.game.id):
                 send_message(play.chat_id, "Joc esborrat")
                 games_menu(play.chat_id)
@@ -766,13 +782,11 @@ def fix_chars(string):
     '''
     Fixes some chars ODS files might replace
     '''
-    print("original: "+str(string))
     old = ["’"]
     new = ["'"]
 
     for i in range(len(old)):
         string = string.replace(old[i], new[i])
-    print("resultat: "+str(string))
     return string
 
 
