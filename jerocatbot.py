@@ -45,7 +45,7 @@ commands = {  # command description used in the "help" command
 
 commands_private = {  # command description used in the "help" command
     'games': 'Llista de jocs disponibles per activar',
-    'edit': 'Entra en mode editor',
+    'login': 'Entra en mode editor',
     'logout': 'Surt del mode editor'
 }
 
@@ -74,8 +74,8 @@ def command_games(m):
     play_show_status(chat_id)
 
 
-@bot.message_handler(commands=['edit'])
-def command_edit(m):
+@bot.message_handler(commands=['login'])
+def command_login(m):
     chat_id = m.chat.id
     if m.json['chat']['type'] != "private":
         reply_to(m, "Només es poden editar jocs per converses privades")
@@ -107,7 +107,7 @@ def command_logout(m):
 def command_help(m):
     chat_id = m.chat.id
     help_text = "Escull una comanda: \n"
-    if m.chat.type=="private":
+    if m.chat.type == "private":
         for key in commands_private:  # generate help text out of the commands dictionary defined at the top
             help_text += "/" + key + ": "
             help_text += commands_private[key] + "\n"
@@ -325,10 +325,9 @@ def editing(m):
 
 
 def answer_edit_menu(chat_id, question):
-    send_message(chat_id, "Editant respostes de "+question.text,
+    send_message(chat_id, "Editant respostes de: "+question.text+"\n"
+                 + "Escull una resposta per editar, o escriu-ne un de nova",
                  reply_markup=answers_edit_markup(question), disable_notification=True)
-    send_message(
-        chat_id, "Escull una resposta per editar, o escriu-ne un de nova", disable_notification=True)
 
 
 def answers_edit_markup(question):
@@ -361,6 +360,9 @@ def answers_edit_menu_response(play, call):
         elif param[0] == "qad":  # deleting answer
             q = j.question_get(id=int(play.get("question_id")))
             j.answer_delete(param[1])
+            send_message(play.chat_id, "S'ha esborrat la resposta",
+                         disable_notification=True)
+
             answer_edit_menu(play.chat_id, q)
 
         elif param[0] == "0":  # cancel
@@ -710,7 +712,8 @@ def import_ods(m):
                 g = j.game_add(name=sheet.name, user=u1,
                                status=j.STATUS_PUBLIC)
                 pass
-            send_message(chat_id, "Processant: "+str(g.name))
+            send_message(chat_id, "Processant: "+str(g.name),
+                         disable_notification=True)
             for row in sheet:
                 q = None
                 first = True
@@ -732,9 +735,9 @@ def import_ods(m):
                                 a_new += 1
                             a_counter += 1
             send_message(chat_id, "S'han processat "+str(q_counter) +
-                         " preguntes i "+str(a_counter)+" respostes")
+                         " preguntes i "+str(a_counter)+" respostes", disable_notification=True)
             send_message(chat_id, "S'han afegit "+str(q_new) +
-                         " preguntes i "+str(a_new)+" respostes")
+                         " preguntes i "+str(a_new)+" respostes", disable_notification=True)
     try:
         os.remove(temp_file.name)
     except:
@@ -742,6 +745,9 @@ def import_ods(m):
 
 
 # class Expirer(Thread):
+#     '''
+#     This class create a thread to delete expiring messages. It cas a method to add messages to the queue.
+#     '''
 #     queue = None
 #     index = None
 #     max_time = None
