@@ -5,6 +5,7 @@ El bot anirà llegint els missatges i si comencen per número mirarà si és la 
 També es podrà afegir el bot a un grup i anirà controlant les punctuacions.
 
 Ja es permet editar els jocs existents des del bot mateix, així com desgarregar-los en un document .ODS i tornar-los a pujar. Quan es puja un document, si coincideixen els noms dels jocs, s'afegiran les preguntes i respostes noves només.
+(Si crees jocs nous, fes-me'ls arribar ;-) )
 
 Per fer una prova ràpida (després de renombrar i omplir config.demo.ini):
 python3 initialize.py ; python3 jerocatbot.py
