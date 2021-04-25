@@ -290,11 +290,11 @@ def question_edit_markup(play):
     markup = InlineKeyboardMarkup()
     markup.row_width = 2
     game = j.game_get(id=play.game.id)
-    pag = int(play.get("pagina",0))
-    i=0
+    pag = int(play.get("pag", 0))
+    i = 0
     for q in game.questions:
-        i+=1
-        if (int(i/10)==pag):
+        i += 1
+        if (int(i/10) == pag):
             # question button
             buton_q = "qe_" + str(q.id)
             # answer button
@@ -307,7 +307,7 @@ def question_edit_markup(play):
 
                 answers_txt = answers_txt[:-2]
             markup.add(InlineKeyboardButton(q.text, callback_data=buton_q),
-                    InlineKeyboardButton(answers_txt, callback_data=buton_a))
+                       InlineKeyboardButton(answers_txt, callback_data=buton_a))
     markup.add(InlineKeyboardButton("<--Pàg", callback_data="pag_pre"),
                InlineKeyboardButton("Pàg-->", callback_data="pag_post"))
     markup.add(InlineKeyboardButton("Cancel·la", callback_data="0"),
@@ -447,6 +447,7 @@ def games_menu(chat_id):
     p = j.play_get(chat_id)
     p.status = j.STATUS_GAMES_MENU
     p.unset("question_id")
+    p.unset('pag')
     j.save()
     send_message(chat_id, "Escull un joc",
                  reply_markup=games_menu_markup(), disable_notification=True)
@@ -514,13 +515,13 @@ def questions_edit_menu_response(play, call):
             # mostrem el menú per editar o esborrar la pregunta
             answer_edit_menu(play.chat_id, q)
         elif param[0] == "pag":  # Cancel
-            pag=int(play.get("pagina",0))
-            if param[1]=="pre":
-                pag=max(pag-1,0)
+            pag = int(play.get("pag", 0))
+            if param[1] == "pre":
+                pag = max(pag-1, 0)
             else:
-                pag=min(pag+1, int(len(play.game.questions)/10))
+                pag = min(pag+1, int(len(play.game.questions)/10))
 
-            play.set("pagina",int(pag))
+            play.set("pag", int(pag))
             j.save()
             questions_edit_menu(play.chat_id)
         elif param[0] == "0":  # Cancel

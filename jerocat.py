@@ -145,6 +145,7 @@ class Jerocat:
 
     def play_set_game(self, play, game):
         play.game = game
+        play.unset('pag')
         session.commit()
 
     def game_list_full(self, uid=0):
