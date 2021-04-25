@@ -766,13 +766,11 @@ def fix_chars(string):
     '''
     Fixes some chars ODS files might replace
     '''
-    print("original: "+str(string))
     old = ["’"]
     new = ["'"]
 
     for i in range(len(old)):
         string = string.replace(old[i], new[i])
-    print("resultat: "+str(string))
     return string
 
 
