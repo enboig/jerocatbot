@@ -112,6 +112,17 @@ class Jerocat:
             g = session.query(Game).filter(Game.name == name).first()
         return g
 
+    def game_delete(self, id=None):
+        '''
+        Delete a game if it has no questions
+        '''
+        g = session.query(Game).get(id)
+        if (len(g.questions)) > 0:  # Game is not empty
+            return False
+        session.query(Game).filter(Game.id == int(id)).delete()
+        session.commit()
+        return g
+
     def play_init(self, chat_id):
         p = Play(chat_id=chat_id)
         session.add(p)

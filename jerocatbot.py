@@ -173,31 +173,34 @@ def command_default(m):
     if m.content_type == "text":
         # check if we have a possible answer
         play = j.play_get(chat_id)
+        if play.get("editing", False) == True:
+            if (play.status == Jerocat.STATUS_VALIDATED):  # Estem editant
+                # editing(m)
+                pass
+            elif (play.status == Jerocat.STATUS_GAMES_MENU):
+                j.game_add(fix_chars(m.text))
+                games_menu(chat_id)
+
+            elif (play.status == Jerocat.STATUS_EDITING_QUESTION_TEXT):
+                j.question_update(play.get('question_id'), m.text)
+                play.status = j.STATUS_EDITING_QUESTIONS
+                play.unset("question_id")
+                j.save()
+                questions_edit_menu(play.chat_id)
+
+            elif (play.status == Jerocat.STATUS_EDITING_ANSWERS):
+                # assuming new answer
+                question = j.question_get(id=play.get('question_id'))
+                j.answer_add(question, m.text)
+                answer_edit_menu(chat_id, question)
+            elif (play.status == j.STATUS_EDITING_QUESTIONS):
+                # Adding a aquestion
+                j.question_add(play.game, m.text.strip())
+                questions_edit_menu(play.chat_id)
         if (play.status == Jerocat.STATUS_VALIDATING):
             login(m)
-        elif (play.status == Jerocat.STATUS_VALIDATED):  # Estem editant
-            # editing(m)
-            pass
-
-        elif (play.status == Jerocat.STATUS_EDITING_QUESTION_TEXT):
-            j.question_update(play.attributes['question_id'], m.text)
-            play.status = j.STATUS_EDITING_QUESTIONS
-            play.unset("question_id")
-            j.save()
-            questions_edit_menu(play.chat_id)
-
-        elif (play.status == Jerocat.STATUS_EDITING_ANSWERS):
-            # assuming new answer
-            question = j.question_get(id=play.attributes['question_id'])
-            j.answer_add(question, m.text)
-            answer_edit_menu(chat_id, question)
-        elif (play.status == j.STATUS_EDITING_QUESTIONS):
-            # Adding a aquestion
-            j.question_add(play.game, m.text.strip())
-            questions_edit_menu(play.chat_id)
-
         else:
-            if (m.text[:1].isdigit()):
+            if (play.game != None and m.text[:1].isdigit()):
                 check_answer(m)
 
     elif m.content_type == "document":
@@ -264,7 +267,7 @@ def login(m):
     chat_id = m.chat.id
     play = j.play_get(chat_id)
     if (m.text == ADMIN_PASSWORD):
-        play.attributes['editing'] = True
+        play.set('editing', True)
         j.save()
         bot.delete_message(m.chat.id, m.message_id)
         send_message(chat_id, "Contrasenya acceptada",
@@ -301,6 +304,8 @@ def question_edit_markup(play):
             answers_txt = answers_txt[:-2]
         markup.add(InlineKeyboardButton(q.text, callback_data=buton_q),
                    InlineKeyboardButton(answers_txt, callback_data=buton_a))
+    markup.add(InlineKeyboardButton("Cancel·la", callback_data="0"),
+               InlineKeyboardButton("Esborra el joc", callback_data="gd"))
 
     # buton_data = {"game_id": play.game.id, "question_id": 0}
     # markup.add(InlineKeyboardButton(
@@ -439,8 +444,8 @@ def games_menu(chat_id):
     j.save()
     send_message(chat_id, "Escull un joc",
                  reply_markup=games_menu_markup(), disable_notification=True)
-
-    time.sleep(10)
+    if p.get("editing", False) == True:
+        send_message(chat_id, "O escriu el nom d'un joc per afegir-lo")
 
 
 def games_menu_markup():
@@ -491,19 +496,30 @@ def questions_edit_menu_response(play, call):
         if param[0] == "qe":  # estem passant una pregunta a editar
             q = j.question_get(id=int(param[1]))
             play.status = Jerocat.STATUS_EDITING_QUESTION_TEXT
-            play.attributes["question_id"] = q.id
+            play.set("question_id", q.id)
             j.save()
             # mostrem el menú per editar o esborrar la pregunta
             question_edit_message(play.chat_id, q)
         elif param[0] == "qae":  # estem editant respostes....
             q = j.question_get(id=int(param[1]))
             play.status = Jerocat.STATUS_EDITING_ANSWERS
-            play.attributes["question_id"] = q.id
+            play.set("question_id", q.id)
             j.save()
             # mostrem el menú per editar o esborrar la pregunta
             answer_edit_menu(play.chat_id, q)
         elif param[0] == "0":  # Cancel
+            play.status = Jerocat.STATUS_VALIDATED
+            j.save()
             # TODO estem cancel·lant l'edició d'una resposta
+            games_menu(play.chat_id)
+        elif param[0] == "gd":  # Esborrant un joc!!!!
+            print("Esborraré un joc!!!!")
+            if j.game_delete(play.game.id):
+                send_message(play.chat_id, "Joc esborrat")
+                games_menu(play.chat_id)
+            else:
+                send_message(play.chat_id, "Només esborraré jocs buits")
+                questions_edit_menu(play.chat_id)
             pass
         else:
             answer_callback_query(play.chat_id, "Opció incorrecta")
@@ -707,9 +723,9 @@ def import_ods(m):
             a_counter = 0
             q_new = 0
             a_new = 0
-            g = j.game_get(name=sheet.name)
+            g = j.game_get(name=fix_chars(sheet.name))
             if g == None:
-                g = j.game_add(name=sheet.name, user=u1,
+                g = j.game_add(name=fix_chars(sheet.name), user=u1,
                                status=j.STATUS_PUBLIC)
                 pass
             send_message(chat_id, "Processant: "+str(g.name),
@@ -719,19 +735,21 @@ def import_ods(m):
                 first = True
                 for cell in row:
                     if first:
-                        q = j.question_get(g, text=str(cell).strip())
+                        q = j.question_get(
+                            g, text=fix_chars(str(cell).strip()))
                         if q == None:
                             q = j.question_add(
-                                game=g, question=str(cell).strip())
+                                game=g, question=fix_chars(str(cell).strip()))
                             q_new += 1
                         q_counter += 1
                         first = False
                     else:
                         if str(cell).strip() != "":
-                            a = j.answer_get(q, text=str(cell).strip())
+                            a = j.answer_get(
+                                q, text=fix_chars(str(cell).strip()))
                             if a == None:
                                 a = j.answer_add(
-                                    question=q, answer=str(cell).strip())
+                                    question=q, answer=fix_chars(str(cell).strip()))
                                 a_new += 1
                             a_counter += 1
             send_message(chat_id, "S'han processat "+str(q_counter) +
@@ -742,6 +760,20 @@ def import_ods(m):
         os.remove(temp_file.name)
     except:
         pass
+
+
+def fix_chars(string):
+    '''
+    Fixes some chars ODS files might replace
+    '''
+    print("original: "+str(string))
+    old = ["’"]
+    new = ["'"]
+
+    for i in range(len(old)):
+        string = string.replace(old[i], new[i])
+    print("resultat: "+str(string))
+    return string
 
 
 # class Expirer(Thread):
