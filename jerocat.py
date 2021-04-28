@@ -1,4 +1,5 @@
 from datetime import date
+from time import sleep, time
 from base import Session, engine, Base, metadata
 from sqlalchemy import create_engine, select, MetaData, Table, and_
 
@@ -253,6 +254,7 @@ class Jerocat:
         return p
 
     def save(self):
+        sleep(3)
         session.commit()
 
     # get answers from game_id and question_position

@@ -50,8 +50,8 @@ commands_private = {  # command description used in the "help" command
 }
 
 # https://github.com/eternnoir/pyTelegramBotAPI/issues/880
-#bot = telebot.TeleBot(TOKEN)
-bot = telebot.TeleBot(TOKEN, threaded=False)
+bot = telebot.TeleBot(TOKEN)
+#bot = telebot.TeleBot(TOKEN, threaded=False)
 
 '''
 COMMANDS
