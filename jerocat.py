@@ -254,7 +254,6 @@ class Jerocat:
         return p
 
     def save(self):
-        sleep(3)
         session.commit()
 
     # get answers from game_id and question_position
