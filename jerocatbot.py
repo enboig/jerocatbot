@@ -324,17 +324,17 @@ def question_edit_markup(play):
     return markup
 
 
-def editing(m):
-    chat_id = m.chat.id
-    play = j.play_get(chat_id)
-    if (play.game.id > 0):  # editant i tenim joc acttivat
-        if ("question" in play.attributes):  # tenim pregunta
-            answer_edit_menu(play)
-            pass
-        else:  # no tenim res, ho assumim com a pregunta nova
-            bot.delete_message(m.chat.id, m.message_id)
-            j.question_add(play.game, m.text)
-            questions_edit_menu(chat_id)
+# def editing(m):
+#     chat_id = m.chat.id
+#     play = j.play_get(chat_id)
+#     if (play.game.id > 0):  # editant i tenim joc acttivat
+#         if ("question" in play.attributes):  # tenim pregunta
+#             answer_edit_menu(play)
+#             pass
+#         else:  # no tenim res, ho assumim com a pregunta nova
+#             bot.delete_message(m.chat.id, m.message_id)
+#             j.question_add(play.game, m.text)
+#             questions_edit_menu(chat_id)
 
 
 # show edit dialog for answers
@@ -435,11 +435,11 @@ def check_answer(m):
             send_message(ORACULUS, help_112)
 
 
-def menu_cancel(play, call):
-    if play.status == j.STATUS_EDITING_QUESTION_TEXT:
-        play.unset("question_id")
-        play.status
-        j.save()
+# def menu_cancel(play, call):
+#     if play.status == j.STATUS_EDITING_QUESTION_TEXT:
+#         play.unset("question_id")
+#         play.status
+#         j.save()
 
 
 def questions_edit_menu(chat_id):
