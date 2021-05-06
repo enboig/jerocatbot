@@ -5,6 +5,7 @@
 from jerocat import Jerocat
 import logging
 import re
+# import time
 
 from telegram import Update, ForceReply,  InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, CallbackQueryHandler
@@ -369,7 +370,7 @@ def check_answer(update, context):
     answer = j.answer_check(play.game, position, answer_text)
     question = j.question_from_position(play.game, position)
     if (answer != None):
-        user = update.chat_member.from_user
+        user = update.effective_user
         j.point_add(play, user, question, answer)
         play_show_status(update, context)
     else:
@@ -587,16 +588,15 @@ def import_ods(update, context):
             chat_id=update.effective_chat.id, text="Només puc importar fitxers .ods")
         return
 
+    temp_file, temp_path = tempfile.mkstemp(suffix=".ods")
     file_id = update.message.document.file_id
     newFile = context.bot.get_file(file_id)
 #    filePath= newFile.download(custom_path=tempfile.gettempdir())
-    filePath = newFile.download()
+    newFile.download(temp_path)
 
-    print(filePath)
+    u1 = j.user_get(update.effective_user.id)
 
-    u1 = 0  # j.user_get(update.chat_member.from_user)
-
-    book = pe.get_book(file_name=filePath)
+    book = pe.get_book(file_name=temp_path)
     for sheet in book:
         if (sheet.name != "Helper"):
             q_counter = 0
@@ -638,10 +638,9 @@ def import_ods(update, context):
                                      " preguntes i "+str(a_new)+" respostes", disable_notification=True)
 
     try:
-        os.remove(filePath)
+        os.remove(temp_path)
     except:
         pass
-
     return
 
 
