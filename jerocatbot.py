@@ -308,8 +308,13 @@ def question_edit_markup(play):
                 answers_txt = answers_txt[:-2]
             markup.add(InlineKeyboardButton(q.text, callback_data=buton_q),
                        InlineKeyboardButton(answers_txt, callback_data=buton_a))
-    markup.add(InlineKeyboardButton("<--Pàg", callback_data="pag_pre"),
-               InlineKeyboardButton("Pàg-->", callback_data="pag_post"))
+    if (pag > 0) and (pag < int(len(game.questions)/10)):
+        markup.add(InlineKeyboardButton("<--Pàg", callback_data="pag_pre"),
+                   InlineKeyboardButton("Pàg-->", callback_data="pag_post"))
+    elif (pag > 0):
+        markup.add(InlineKeyboardButton("<--Pàg", callback_data="pag_pre"))
+    elif (pag < int(len(game.questions)/10)):
+        markup.add(InlineKeyboardButton("Pàg-->", callback_data="pag_post"))
     markup.add(InlineKeyboardButton("Cancel·la", callback_data="0"),
                InlineKeyboardButton("Esborra el joc", callback_data="gd"))
 
@@ -823,3 +828,4 @@ def fix_chars(string):
 
 
 bot.polling()
+# bot.infinity_polling(none_stop=True)

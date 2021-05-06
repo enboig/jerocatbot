@@ -7,9 +7,9 @@ from base import Base
 class User(Base):
     __tablename__ = 'user'
     id = Column(Integer, primary_key=True)
-    username = Column(String)
-    first_name = Column(String)
-    last_name = Column(String)
+    username = Column(String(255))
+    first_name = Column(String(255))
+    last_name = Column(String(255))
     created_on = Column(DateTime, default=func.now())
     updated_on = Column(DateTime, default=func.now())
     # questions = relationship(
