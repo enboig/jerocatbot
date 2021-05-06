@@ -48,35 +48,71 @@ def games_command(update: Update, context: CallbackContext) -> None:
         p = j.play_get(chat_id)
     games_menu(update, context)
 
-# def echo(update: Update, _: CallbackContext) -> None:
-#     """Echo the user message."""
-#     update.message.reply_text(update.message.text)
+
+def status_command(update, context):
+    play_show_status(update, context)
 
 
-def games_menu(update, context):
-    chat_id = update.effective_chat.id
-    p = j.play_get(chat_id)
-    p.status = j.STATUS_GAMES_MENU
-    p.unset("question_id")
-    p.unset('pag')
-    j.save()
-
-    # context.bot.send_message(chat_id=update.effective_chat.id, text="I'm a bot, please talk to me!")
-    context.bot.send_message(
-        chat_id=update.effective_chat.id, text="Escull un joc",
-        reply_markup=games_menu_markup())
-    if p.get("editing", False) == True:
+def login_command(update, context):
+    chat_id = update.message.chat.id
+    if update.message.chat.type != "private":
         context.bot.send_message(
-            chat_id=update.effective_chat.id, text="O escriu el nom d'un joc per afegir-lo")
+            chat_id=update.effective_chat.id, text="Només es poden editar jocs per converses privades")
+        return
+    p = j.play_get(chat_id)
+    if p.get("editing", False) != True:
+        p.status = Jerocat.STATUS_VALIDATING
+        j.save()
+        context.bot.send_message(
+            chat_id=update.effective_chat.id, text="Entra la contrasenya d'editor")
+    else:
+        context.bot.send_message(
+            chat_id=update.effective_chat.id, text="Ja estàs validat")
 
 
-def games_menu_markup():
-    keyboard = []
-    games = j.game_list_full()
-    for g in games:
-        keyboard.append([InlineKeyboardButton(
-            g.name, callback_data="g_"+str(g.id))])
-    return InlineKeyboardMarkup(keyboard)
+def logout_command(update, context):
+    play = j.play_get(update.effective_chat.id)
+    play.attributes = {}
+    play.status = j.STATUS_NOTHING
+    play.game = None
+    j.save()
+    context.bot.send_message(
+        chat_id=update.effective_chat.id, text="Logged out")
+
+
+def help_command(update, context):
+
+    commands = {  # command description used in the "help" command
+        'games': 'Llista de jocs disponibles per activar',
+        'status': 'Mostra com està la partida, i quins jeroglífics ja han sigut resoltrs',
+    }
+
+    commands_private = {  # command description used in the "help" command
+        'games': 'Llista de jocs disponibles per activar',
+        'login': 'Entra en mode editor',
+        'logout': 'Surt del mode editor'
+    }
+
+    help_text = "Escull una comanda: \n"
+    if update.message.chat.type == "private":
+        for key in commands_private:  # generate help text out of the commands dictionary defined at the top
+            help_text += "/" + key + ": "
+            help_text += commands_private[key] + "\n"
+    else:
+        for key in commands:  # generate help text out of the commands dictionary defined at the top
+            help_text += "/" + key + ": "
+            help_text += commands[key] + "\n"
+    context.bot.send_message(chat_id=update.effective_chat.id, text=help_text)
+
+
+def export_command(update, context):
+    p = j.play_get(update.effective_chat.id)
+    if p.get('editing', False) == False:
+        context.bot.send_message(chat_id=update.effective_chat.id,
+                                 text="Has d'estar validat per poder exportar jocs")
+        return
+
+    export_ods(update, context)
 
 
 def button(update: Update, context: CallbackContext) -> None:
@@ -116,34 +152,164 @@ def button(update: Update, context: CallbackContext) -> None:
         print(e)
 
 
-def game_menu_response(play, update, context):
+def process_text(update, context):
     '''
-    Response to game menu. It will delete the game, check if game ok and show status or game menu again
+    Default handler for messages. It includes:
+    * Text for adding/editing, dependending on play.STATUS
+    * Text for answers if a game is active
     '''
-    query = update.callback_query
-    param = (query.data).split("_")
-    if param[0] == "g":
-        g = j.game_get(param[1])
-        if (g == False):
-            context.bot.send_message(
-                chat_id=update.effective_chat.id, text="El joc no existeix!")
-            return
+    chat_id = update.effective_chat.id
+    # check if we have a possible answer
+    play = j.play_get(chat_id)
+    if play.get("editing", False) == True:
+        if (play.status == Jerocat.STATUS_VALIDATED):  # Estem editant
+            # editing(m)
+            pass
+        elif (play.status == Jerocat.STATUS_GAMES_MENU):
+            j.game_add(fix_chars(update.message.text))
+            games_menu(chat_id)
 
-        context.bot.send_message(chat_id=update.effective_chat.id, text="Has escollit " +
-                                 g.name)
-        j.play_set_game(play, g)
-        if play.get("editing") == True:
-            play.status = Jerocat.STATUS_EDITING_QUESTIONS
+        elif (play.status == Jerocat.STATUS_EDITING_QUESTION_TEXT):
+            j.question_update(play.get('question_id'), update.message.text)
+            play.status = j.STATUS_EDITING_QUESTIONS
+            play.unset("question_id")
             j.save()
             questions_edit_menu(update, context)
-        else:
-            play.status = Jerocat.STATUS_GAME_PLAY
-            j.save()
-            play_show_status(update, context)
+
+        elif (play.status == Jerocat.STATUS_EDITING_ANSWERS):
+            # assuming new answer
+            question = j.question_get(id=play.get('question_id'))
+            j.answer_add(question, update.message.text)
+            answer_edit_menu(question, update, context)
+        elif (play.status == j.STATUS_EDITING_QUESTIONS):
+            # Adding a aquestion
+            j.question_add(play.game, update.message.text.strip())
+            questions_edit_menu(update, context)
+
+    if (play.status == Jerocat.STATUS_VALIDATING):
+        login(update, context)
     else:
+        if (play.game != None and update.message.text[:1].isdigit()):
+            check_answer(update, context)
+
+
+def split_answer(input):
+    '''
+    Splits a message in question_order and answer_text
+    '''
+    question_order = int(re.search(r'\d+', input).group())
+    answer_text = input[len(str(question_order)):].strip(" .,;-_:")
+    return question_order, answer_text
+
+
+def play_show_status(update, context):
+    '''
+    Print game status:
+    * All the questions and typed answers
+    * Stats of player answers (TODO)
+    '''
+    chat_id = update.effective_chat.id
+    p = j.play_get(chat_id)
+    if (p == False):
+        j.play_init(chat_id)
+        p = j.play_get(chat_id)
+    g = j.game_get(p.game_id)
+    if (g == None):
         context.bot.send_message(
-            chat_id=update.effective_chat.id, text="Opció incorrecta")
-        return False
+            chat_id=update.effective_chat.id, text="No hi ha cap joc actiu")
+    else:
+        message = g.name+"\n"
+        for q in g.questions:
+            message += str(q.position) + ". "
+            point = j.points_get(p, q)
+            if (point != None):
+                message += '"'+point.answer.text+'":  '
+            message += q.text
+            message += "\n"
+        rank = j.play_get_ranking(p)
+        if (len(rank) > 0):
+            message += "\nRanking:\n"
+            for uid, points in rank.items():
+                u = j.user_get(uid)
+                message += str(points) + " -> " + ((u.first_name+" "+u.last_name)
+                                                   if len(u.first_name+u.last_name) else u.username)+"\n"
+        context.bot.send_message(
+            chat_id=update.effective_chat.id, text=message)
+
+
+def login(update, context):
+    chat_id = update.effective_chat.id
+    play = j.play_get(chat_id)
+    if (update.message.text == ADMIN_PASSWORD):
+        play.set('editing', True)
+        j.save()
+        context.bot.deleteMessage(chat_id, update.message.message_id)
+        context.bot.send_message(
+            chat_id=update.effective_chat.id, text="Contrasenya acceptada")
+        context.bot.send_message(chat_id=update.effective_chat.id,
+                                 text="Activa un joc amb /games i introdueix un número per editar pregunta i resposta (0 per a inserir-ne una...)")
+    else:
+        play.status = Jerocat.STATUS_NOTHING
+        j.save()
+        context.bot.deleteMessage(chat_id, update.message.message_id)
+        context.bot.send_message(
+            chat_id=update.effective_chat.id, text="Contrasenya INCORRECTA")
+        context.bot.send_message(
+            chat_id=ORACULUS, text="Login fallit: "+str(update))
+
+
+def question_edit_markup(play):
+
+    keyboard = []
+    game = j.game_get(id=play.game.id)
+    pag = int(play.get("pag", 0))
+    i = 0
+    for q in game.questions:
+        i += 1
+        if (int(i/10) == pag):
+            # question button
+            buton_q = "qe_" + str(q.id)
+            # answer button
+            buton_a = "qae_" + str(q.id)
+            answers_txt = "+++ add answer +++"
+            if len(q.answers):
+                answers_txt = ""
+                for a in q.answers:
+                    answers_txt += a.text+", "
+
+                answers_txt = answers_txt[:-2]
+            keyboard.append([InlineKeyboardButton(q.text, callback_data=buton_q),
+                             InlineKeyboardButton(answers_txt, callback_data=buton_a)])
+    if (pag > 0) and (pag < int(len(game.questions)/10)):
+        keyboard.append([InlineKeyboardButton("<--Pàg", callback_data="pag_pre"),
+                         InlineKeyboardButton("Pàg-->", callback_data="pag_post")])
+    elif (pag > 0):
+        keyboard.append([InlineKeyboardButton(
+            "<--Pàg", callback_data="pag_pre")])
+    elif (pag < int(len(game.questions)/10)):
+        keyboard.append([InlineKeyboardButton(
+            "Pàg-->", callback_data="pag_post")])
+    keyboard.append([InlineKeyboardButton("Cancel·la", callback_data="0"),
+                     InlineKeyboardButton("Esborra el joc", callback_data="gd")])
+
+    return InlineKeyboardMarkup(keyboard)
+
+
+def answer_edit_menu(question, update=None, context=None):
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Editant respostes de: "+question.text+"\n"
+                             + "Escull una resposta per editar, o escriu-ne un de nova",
+                             reply_markup=answers_edit_markup(question))
+
+
+def answers_edit_markup(question):
+    keyboard = []
+    answers = question.answers
+    for a in answers:
+        keyboard.append([InlineKeyboardButton(
+            a.text, callback_data="qad_"+str(a.id))])
+    keyboard.append([InlineKeyboardButton(
+        "Cancel·la", callback_data="0")])
+    return InlineKeyboardMarkup(keyboard)
 
 
 def answers_edit_menu_response(play, update, context):
@@ -182,67 +348,40 @@ def answers_edit_menu_response(play, update, context):
         print(e)
 
 
-def question_delete_menu_response(play, update, context):
-    '''
-    Response to delete question menu and "cancel editing question text"
-    '''
-    try:
-        query = update.callback_query
-        param = (query.data).split("_")
-        if param[0] == "qd":  # estem passant una pregunta a esborrar
-            if int(param[1]) > 0:
-                j.question_delete(id=int(param[1]))
-
-            play.status = j.STATUS_EDITING_QUESTIONS
-            play.unset("question_id")
-            context.bot.send_message(
-                chat_id=update.effective_chat.id, text="Pregunta esborrada, amb les seves respostes i puntucacions.")
-            j.save()
-            questions_edit_menu(update, context)
-
-        else:
-            context.bot.send_message(
-                chat_id=update.effective_chat.id, text="Opció incorrecta")
-            return False
-
-    except Exception as e:
-        print("except: def question_delete_menu_response(play, call):")
-        print(e)
+def question_edit_message(chat_id, question, update, context):
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Reescriu la pregunta, o prem per esborrar",
+                             reply_markup=question_delete_markup(question))
 
 
-def play_show_status(update, context):
-    '''
-    Print game status:
-    * All the questions and typed answers
-    * Stats of player answers (TODO)
-    '''
+def question_delete_markup(question):
+    keyboard = []
+    keyboard.append([InlineKeyboardButton(
+        "Esborra: "+str(question.text), callback_data="qd_"+str(question.id))])
+    keyboard.append([InlineKeyboardButton(
+        "Cancel·la", callback_data="qd_0")])
+    return InlineKeyboardMarkup(keyboard)
+
+
+def check_answer(update, context):
     chat_id = update.effective_chat.id
-    p = j.play_get(chat_id)
-    if (p == False):
-        j.play_init(chat_id)
-        p = j.play_get(chat_id)
-    g = j.game_get(p.game_id)
-    if (g == None):
-        context.bot.send_message(
-            chat_id=update.effective_chat.id, text="No hi ha cap joc actiu")
+    play = j.play_get(chat_id)
+    position, answer_text = split_answer(update.message.text)
+    answer = j.answer_check(play.game, position, answer_text)
+    question = j.question_from_position(play.game, position)
+    if (answer != None):
+        user = update.chat_member.from_user
+        j.point_add(play, user, question, answer)
+        play_show_status(update, context)
     else:
-        message = g.name+"\n"
-        for q in g.questions:
-            message += str(q.position) + ". "
-            point = j.points_get(p, q)
-            if (point != None):
-                message += '"'+point.answer.text+'":  '
-            message += q.text
-            message += "\n"
-        rank = j.play_get_ranking(p)
-        if (len(rank) > 0):
-            message += "\nRanking:\n"
-            for uid, points in rank.items():
-                u = j.user_get(uid)
-                message += str(points) + " -> " + ((u.first_name+" "+u.last_name)
-                                                   if len(u.first_name+u.last_name) else u.username)+"\n"
-        context.bot.send_message(
-            chat_id=update.effective_chat.id, text=message)
+        # ask for human help....
+        help_112 = "Joc: "+play.game.name+"\nPregunta: " + \
+            question.text+"\nResposta: "+answer_text
+        if (question.answers):
+            help_112 += "\nAltres respostes:"
+            for a in question.answers:
+                help_112 += "\n - "+a.text
+            context.bot.send_message(
+                chat_id=ORACULUS, text=help_112)
 
 
 def questions_edit_menu(update, context):
@@ -252,41 +391,60 @@ def questions_edit_menu(update, context):
         reply_markup=question_edit_markup(p))
 
 
-def question_edit_markup(play):
+def games_menu(update, context):
+    chat_id = update.effective_chat.id
+    p = j.play_get(chat_id)
+    p.status = j.STATUS_GAMES_MENU
+    p.unset("question_id")
+    p.unset('pag')
+    j.save()
 
+    # context.bot.send_message(chat_id=update.effective_chat.id, text="I'm a bot, please talk to me!")
+    context.bot.send_message(
+        chat_id=update.effective_chat.id, text="Escull un joc",
+        reply_markup=games_menu_markup())
+    if p.get("editing", False) == True:
+        context.bot.send_message(
+            chat_id=update.effective_chat.id, text="O escriu el nom d'un joc per afegir-lo")
+
+
+def games_menu_markup():
     keyboard = []
-    game = j.game_get(id=play.game.id)
-    pag = int(play.get("pag", 0))
-    i = 0
-    for q in game.questions:
-        i += 1
-        if (int(i/10) == pag):
-            # question button
-            buton_q = "qe_" + str(q.id)
-            # answer button
-            buton_a = "qae_" + str(q.id)
-            answers_txt = "+++ add answer +++"
-            if len(q.answers):
-                answers_txt = ""
-                for a in q.answers:
-                    answers_txt += a.text+", "
-
-                answers_txt = answers_txt[:-2]
-            keyboard.append([InlineKeyboardButton(q.text, callback_data=buton_q),
-                             InlineKeyboardButton(answers_txt, callback_data=buton_a)])
-    if (pag > 0) and (pag < int(len(game.questions)/10)):
-        keyboard.append([InlineKeyboardButton("<--Pàg", callback_data="pag_pre"),
-                         InlineKeyboardButton("Pàg-->", callback_data="pag_post")])
-    elif (pag > 0):
+    games = j.game_list_full()
+    for g in games:
         keyboard.append([InlineKeyboardButton(
-            "<--Pàg", callback_data="pag_pre")])
-    elif (pag < int(len(game.questions)/10)):
-        keyboard.append([InlineKeyboardButton(
-            "Pàg-->", callback_data="pag_post")])
-    keyboard.append([InlineKeyboardButton("Cancel·la", callback_data="0"),
-                     InlineKeyboardButton("Esborra el joc", callback_data="gd")])
-
+            g.name, callback_data="g_"+str(g.id))])
     return InlineKeyboardMarkup(keyboard)
+
+
+def game_menu_response(play, update, context):
+    '''
+    Response to game menu. It will delete the game, check if game ok and show status or game menu again
+    '''
+    query = update.callback_query
+    param = (query.data).split("_")
+    if param[0] == "g":
+        g = j.game_get(param[1])
+        if (g == False):
+            context.bot.send_message(
+                chat_id=update.effective_chat.id, text="El joc no existeix!")
+            return
+
+        context.bot.send_message(chat_id=update.effective_chat.id, text="Has escollit " +
+                                 g.name)
+        j.play_set_game(play, g)
+        if play.get("editing") == True:
+            play.status = Jerocat.STATUS_EDITING_QUESTIONS
+            j.save()
+            questions_edit_menu(update, context)
+        else:
+            play.status = Jerocat.STATUS_GAME_PLAY
+            j.save()
+            play_show_status(update, context)
+    else:
+        context.bot.send_message(
+            chat_id=update.effective_chat.id, text="Opció incorrecta")
+        return False
 
 
 def questions_edit_menu_response(play, update, context):
@@ -334,7 +492,7 @@ def questions_edit_menu_response(play, update, context):
             else:
                 context.bot.send_message(
                     chat_id=update.effective_chat.id, text="Només esborraré jocs buits")
-                questions_edit_menu(play.chat_id)
+                questions_edit_menu(update, context)
         #     pass
         else:
             context.bot.send_message(
@@ -345,49 +503,40 @@ def questions_edit_menu_response(play, update, context):
         print(e)
 
 
-def question_edit_message(chat_id, question, update, context):
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Reescriu la pregunta, o prem per esborrar",
-                             reply_markup=question_delete_markup(question))
+def question_delete_menu_response(play, update, context):
+    '''
+    Response to delete question menu and "cancel editing question text"
+    '''
+    try:
+        query = update.callback_query
+        param = (query.data).split("_")
+        if param[0] == "qd":  # estem passant una pregunta a esborrar
+            if int(param[1]) > 0:
+                j.question_delete(id=int(param[1]))
 
+            play.status = j.STATUS_EDITING_QUESTIONS
+            play.unset("question_id")
+            context.bot.send_message(
+                chat_id=update.effective_chat.id, text="Pregunta esborrada, amb les seves respostes i puntucacions.")
+            j.save()
+            questions_edit_menu(update, context)
 
-def question_delete_markup(question):
-    keyboard = []
-    keyboard.append([InlineKeyboardButton(
-        "Esborra: "+str(question.text), callback_data="qd_"+str(question.id))])
-    keyboard.append([InlineKeyboardButton(
-        "Cancel·la", callback_data="qd_0")])
-    return InlineKeyboardMarkup(keyboard)
+        else:
+            context.bot.send_message(
+                chat_id=update.effective_chat.id, text="Opció incorrecta")
+            return False
 
-
-def answer_edit_menu(question, update=None, context=None):
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Editant respostes de: "+question.text+"\n"
-                             + "Escull una resposta per editar, o escriu-ne un de nova",
-                             reply_markup=answers_edit_markup(question))
-
-
-def answers_edit_markup(question):
-    keyboard = []
-    answers = question.answers
-    for a in answers:
-        keyboard.append([InlineKeyboardButton(
-            a.text, callback_data="qad_"+str(a.id))])
-    keyboard.append([InlineKeyboardButton(
-        "Cancel·la", callback_data="0")])
-    return InlineKeyboardMarkup(keyboard)
+    except Exception as e:
+        print("except: def question_delete_menu_response(play, call):")
+        print(e)
 
 
 def export_ods(update, context):
     # help page
-    chat_id = update.effective_chat.id
     from pyexcel_ods import save_data
     from collections import OrderedDict
     import tempfile
     import os
-
-    p = j.play_get(chat_id)
-    if p.get('editing', False) == False:
-        context.bot.send_message(chat_id=update.effective_chat.id, text="Has d'estar validat per poder exportar jocs")
-        return
 
     data = OrderedDict()  # from collections import OrderedDict
 
@@ -406,9 +555,8 @@ def export_ods(update, context):
     doc = open(file.name, 'rb')
 
     retries = 3
-    # context.bot.send_document(chat_id, doc, caption="export.ods")
-    context.bot.send_document(chat_id=chat_id, document=open(file.name, 'rb'))
-
+    context.bot.send_document(
+        chat_id=update.effective_chat.id, document=open(file.name, 'rb'))
     os.remove(file.name)
 
 
@@ -424,27 +572,29 @@ def import_ods(update, context):
     print(str(update))
 
     if update.message.chat.type != "private":
-        context.bot.send_message(chat_id=update.effective_chat.id, text="Només es poden importar jocs per converses privades")
+        context.bot.send_message(chat_id=update.effective_chat.id,
+                                 text="Només es poden importar jocs per converses privades")
         return
     p = j.play_get(chat_id)
-    
+
     if p.get('editing', False) == False:
-        context.bot.send_message(chat_id=update.effective_chat.id, text="Has d'estar validat per poder importar jocs")
+        context.bot.send_message(chat_id=update.effective_chat.id,
+                                 text="Has d'estar validat per poder importar jocs")
         return
 
     if update.message.document.mime_type != "application/vnd.oasis.opendocument.spreadsheet":
-        context.bot.send_message(chat_id=update.effective_chat.id, text="Només puc importar fitxers .ods")
+        context.bot.send_message(
+            chat_id=update.effective_chat.id, text="Només puc importar fitxers .ods")
         return
-
 
     file_id = update.message.document.file_id
     newFile = context.bot.get_file(file_id)
 #    filePath= newFile.download(custom_path=tempfile.gettempdir())
-    filePath= newFile.download()
+    filePath = newFile.download()
 
-    print (filePath)
+    print(filePath)
 
-    u1 = 0 #j.user_get(update.chat_member.from_user)
+    u1 = 0  # j.user_get(update.chat_member.from_user)
 
     book = pe.get_book(file_name=filePath)
     for sheet in book:
@@ -459,7 +609,7 @@ def import_ods(update, context):
                                status=j.STATUS_PUBLIC)
                 pass
             context.bot.send_message(chat_id=update.effective_chat.id, text="Processant: "+str(g.name),
-                         disable_notification=True)
+                                     disable_notification=True)
             for row in sheet:
                 q = None
                 first = True
@@ -483,11 +633,9 @@ def import_ods(update, context):
                                 a_new += 1
                             a_counter += 1
             context.bot.send_message(chat_id=update.effective_chat.id, text="S'han processat "+str(q_counter) +
-                         " preguntes i "+str(a_counter)+" respostes", disable_notification=True)
+                                     " preguntes i "+str(a_counter)+" respostes", disable_notification=True)
             context.bot.send_message(chat_id=update.effective_chat.id, text="S'han afegit "+str(q_new) +
-                         " preguntes i "+str(a_new)+" respostes", disable_notification=True)
-
-
+                                     " preguntes i "+str(a_new)+" respostes", disable_notification=True)
 
     try:
         os.remove(filePath)
@@ -495,6 +643,19 @@ def import_ods(update, context):
         pass
 
     return
+
+
+def fix_chars(string):
+    '''
+    Fixes some chars ODS files might replace
+    '''
+    old = ["’"]
+    new = ["'"]
+
+    for i in range(len(old)):
+        string = string.replace(old[i], new[i])
+    return string
+
 
 def main() -> None:
     """Start the bot."""
@@ -505,12 +666,12 @@ def main() -> None:
     dispatcher = updater.dispatcher
 
     # on different commands - answer in Telegram
-    dispatcher.add_handler(CommandHandler("help", help))
+    dispatcher.add_handler(CommandHandler("help", help_command))
     dispatcher.add_handler(CommandHandler("games", games_command))
     dispatcher.add_handler(CommandHandler("login", login_command))
-    dispatcher.add_handler(CommandHandler("logout", logout))
-    dispatcher.add_handler(CommandHandler("status", play_show_status))
-    dispatcher.add_handler(CommandHandler("export", export_ods))
+    dispatcher.add_handler(CommandHandler("logout", logout_command))
+    dispatcher.add_handler(CommandHandler("status", status_command))
+    dispatcher.add_handler(CommandHandler("export", export_command))
 
     dispatcher.add_handler(MessageHandler(Filters.document, import_ods))
 
@@ -527,137 +688,6 @@ def main() -> None:
     # SIGTERM or SIGABRT. This should be used most of the time, since
     # start_polling() is non-blocking and will stop the bot gracefully.
     updater.idle()
-
-
-def process_text(update, context):
-    '''
-    Default handler for messages. It includes:
-    * Text for adding/editing, dependending on play.STATUS
-    * Text for answers if a game is active
-    '''
-    chat_id = update.effective_chat.id
-    # check if we have a possible answer
-    play = j.play_get(chat_id)
-    if play.get("editing", False) == True:
-        if (play.status == Jerocat.STATUS_VALIDATED):  # Estem editant
-            # editing(m)
-            pass
-        elif (play.status == Jerocat.STATUS_GAMES_MENU):
-            j.game_add(fix_chars(update.message.text))
-            games_menu(chat_id)
-
-        elif (play.status == Jerocat.STATUS_EDITING_QUESTION_TEXT):
-            j.question_update(play.get('question_id'), update.message.text)
-            play.status = j.STATUS_EDITING_QUESTIONS
-            play.unset("question_id")
-            j.save()
-            questions_edit_menu(update, context)
-
-        elif (play.status == Jerocat.STATUS_EDITING_ANSWERS):
-            # assuming new answer
-            question = j.question_get(id=play.get('question_id'))
-            j.answer_add(question, update.message.text)
-            answer_edit_menu(question, update, context)
-        elif (play.status == j.STATUS_EDITING_QUESTIONS):
-            # Adding a aquestion
-            j.question_add(play.game, update.message.text.strip())
-            questions_edit_menu(update, context)
-
-    if (play.status == Jerocat.STATUS_VALIDATING):
-        login(update, context)
-    else:
-        if (play.game != None and update.message.text[:1].isdigit()):
-            check_answer(update, context)
-
-
-def login_command(update, context):
-    chat_id = update.message.chat.id
-    if update.message.chat.type != "private":
-        context.bot.send_message(
-            chat_id=update.effective_chat.id, text="Només es poden editar jocs per converses privades")
-        return
-    p = j.play_get(chat_id)
-    if p.get("editing", False) != True:
-        p.status = Jerocat.STATUS_VALIDATING
-        j.save()
-        context.bot.send_message(
-            chat_id=update.effective_chat.id, text="Entra la contrasenya d'editor")
-    else:
-        questions_edit_menu(chat_id)
-
-
-def login(update, context):
-    chat_id = update.effective_chat.id
-    play = j.play_get(chat_id)
-    if (update.message.text == ADMIN_PASSWORD):
-        play.set('editing', True)
-        j.save()
-        context.bot.deleteMessage(chat_id, update.message.message_id)
-        context.bot.send_message(
-            chat_id=update.effective_chat.id, text="Contrasenya acceptada")
-        context.bot.send_message(chat_id=update.effective_chat.id,
-                                 text="Activa un joc amb /games i introdueix un número per editar pregunta i resposta (0 per a inserir-ne una...)")
-    else:
-        play.status = Jerocat.STATUS_NOTHING
-        j.save()
-        context.bot.deleteMessage(chat_id, update.message.message_id)
-        context.bot.send_message(
-            chat_id=update.effective_chat.id, text="Contrasenya INCORRECTA")
-        context.bot.send_message(
-            chat_id=ORACULUS, text="Login fallit: "+str(update))
-
-
-def logout(update, context):
-    play = j.play_get(update.effective_chat.id)
-    play.attributes = {}
-    play.status = j.STATUS_NOTHING
-    play.game = None
-    j.save()
-    context.bot.send_message(
-        chat_id=update.effective_chat.id, text="Logged out")
-
-
-def check_answer(update, context):
-    chat_id = update.effective_chat.id
-    play = j.play_get(chat_id)
-    position, answer_text = split_answer(update.message.text)
-    answer = j.answer_check(play.game, position, answer_text)
-    question = j.question_from_position(play.game, position)
-    if (answer != None):
-        user = update.chat_member.from_user
-        j.point_add(play, user, question, answer)
-        play_show_status(update, context)
-    else:
-        # ask for human help....
-        help_112 = "Joc: "+play.game.name+"\nPregunta: " + \
-            question.text+"\nResposta: "+answer_text
-        if (question.answers):
-            help_112 += "\nAltres respostes:"
-            for a in question.answers:
-                help_112 += "\n - "+a.text
-            context.bot.send_message(
-                chat_id=ORACULUS, text=help_112)
-
-
-def split_answer(input):
-    '''
-    Splits a message in question_order and answer_text
-    '''
-    question_order = int(re.search(r'\d+', input).group())
-    answer_text = input[len(str(question_order)):].strip(" .,;-_:")
-    return question_order, answer_text
-
-
-def fix_chars(string):
-    '''
-    Fixes some chars ODS files might replace
-    '''
-    old = ["’"]
-    new = ["'"]
-
-    for i in range(len(old)):
-        string = string.replace(old[i], new[i])
-    return string
 
 
 if __name__ == '__main__':
