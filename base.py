@@ -39,7 +39,7 @@ if (config['database']["engine"] == "sqlite"):
     _DB_URI = 'sqlite:///' + \
         config['database']["database"]+'.sqlite'+"?check_same_thread=False"
 elif (config['database']["engine"] == "mariadb"):
-    _DB_URI = "mysql+pymysql://"+config['database']["user"]+":"+config['database']["user"] + \
+    _DB_URI = "mysql+pymysql://"+config['database']["user"]+":"+config['database']["password"] + \
         "@"+config['database']["host"]+"/" + \
         config['database']["database"]+"?charset=utf8mb4"
 else:
