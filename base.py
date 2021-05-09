@@ -46,8 +46,11 @@ else:
     print("volatile database")
     _DB_URI = 'sqlite://'
 
-engine = create_engine(_DB_URI)
-#engine = create_engine(_DB_URI,echo=True,)
+if config["database"].getint("debug", 0) == 0:
+    engine = create_engine(_DB_URI)
+else:
+    engine = create_engine(_DB_URI, echo=True,)
+
 metadata = MetaData(bind=None)
 
 #Session = sessionmaker(bind=engine)

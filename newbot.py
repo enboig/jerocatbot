@@ -125,7 +125,7 @@ def button(update: Update, context: CallbackContext) -> None:
     # Some clients may have trouble otherwise. See https://core.telegram.org/bots/api#callbackquery
     query.answer()
 
-    query.edit_message_text(text=f"Selected option: {query.data}")
+    # query.edit_message_text(text=f"Selected option: {query.data}")
     chat_id = update.effective_chat.id
     p = j.play_get(chat_id)
     param = (query.data).split("_")
@@ -140,6 +140,10 @@ def button(update: Update, context: CallbackContext) -> None:
         elif p.status == j.STATUS_EDITING_QUESTION_TEXT:
             question_delete_menu_response(
                 play=p, update=update, context=context)
+        elif param[0] == "aa":
+            answer_accept(update=update, context=context)
+        elif param[0] == "ad":
+            answer_forget(update=update, context=context)
         else:
             print("Unknown command")
             print("p.status:"+str(p.status))
@@ -349,6 +353,25 @@ def answers_edit_menu_response(play, update, context):
         print(e)
 
 
+def answer_accept(update, context):
+    print("def answer_accept(...):")
+    query = update.callback_query
+    print("el missatge és: "+query.data)
+    param = (query.data).split("_")
+    print("l'id de la resposta és: "+str(param[1]))
+    a = j.answer_get(id=int(param[1]), only_accepted=False)
+    print("acceptant: "+str(a.text))
+    a.accepted = True
+    j.save()
+
+
+def answer_forget(update, context):
+    q = None
+    query = update.callback_query
+    param = (query.data).split("_")
+    a = j.answer_delete(id=param[1])
+
+
 def question_edit_message(chat_id, question, update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text="Reescriu la pregunta, o prem per esborrar",
                              reply_markup=question_delete_markup(question))
@@ -367,22 +390,38 @@ def check_answer(update, context):
     chat_id = update.effective_chat.id
     play = j.play_get(chat_id)
     position, answer_text = split_answer(update.message.text)
-    answer = j.answer_check(play.game, position, answer_text)
     question = j.question_from_position(play.game, position)
+    if question == None:
+        return
+    answer = j.answer_check(play.game, position, answer_text)
+    user = update.effective_user
     if (answer != None):
-        user = update.effective_user
         j.point_add(play, user, question, answer)
         play_show_status(update, context)
     else:
         # ask for human help....
+        answer = j.answer_get(
+            question=question, text=answer_text, only_accepted=False)
+        if answer == None:
+            answer = j.answer_add(question=question, answer=fix_chars(
+                str(answer_text).strip()), accepted=False)
+        j.point_add(play, user, question, answer)
+
         help_112 = "Joc: "+play.game.name+"\nPregunta: " + \
             question.text+"\nResposta: "+answer_text
+        altres_respostes = ""
         if (question.answers):
-            help_112 += "\nAltres respostes:"
             for a in question.answers:
-                help_112 += "\n - "+a.text
-            context.bot.send_message(
-                chat_id=ORACULUS, text=help_112)
+                if a.accepted:
+                    altres_respostes += "\n - "+answer.text
+            if (altres_respostes != ""):
+                altres_respostes = "\nAltres respostes:"+altres_respostes
+        help_112 += altres_respostes
+        keyboard = []
+        keyboard.append([InlineKeyboardButton("Accepta", callback_data="aa_"+str(answer.id)),
+                         InlineKeyboardButton("Esborra", callback_data="ad_"+str(answer.id))])
+        context.bot.send_message(chat_id=ORACULUS, text=help_112,
+                                 reply_markup=InlineKeyboardMarkup(keyboard))
 
 
 def questions_edit_menu(update, context):
@@ -626,7 +665,7 @@ def import_ods(update, context):
                     else:
                         if str(cell).strip() != "":
                             a = j.answer_get(
-                                q, text=fix_chars(str(cell).strip()))
+                                q, text=fix_chars(str(cell).strip()), only_accepted=False)
                             if a == None:
                                 a = j.answer_add(
                                     question=q, answer=fix_chars(str(cell).strip()))
