@@ -6,12 +6,12 @@ from base import Base
 
 
 class Answer(Base):
-    __tablename__ = 'answer'
+    __tablename__ = 'answers'
     id = Column(Integer, primary_key=True)
     text = Column(String(255))
     created_on = Column(DateTime, default=func.now())
-    question_id = Column(Integer, ForeignKey('question.id'))
-    user_id = Column(Integer, ForeignKey('user.id'))
+    question_id = Column(Integer, ForeignKey('questions.id'))
+    user_id = Column(Integer, ForeignKey('users.id'))
     accepted = Column(Boolean, default=True)
     # Use cascade='delete,all' to propagate the deletion of a Department onto its Employees
     question = relationship(

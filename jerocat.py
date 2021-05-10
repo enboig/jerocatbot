@@ -199,10 +199,10 @@ class Jerocat:
 
     def question_delete(self, game=None, position=None, text=None, id=None):
         if id != None:
-            session.query(Question).filter(Question.id == int(id)).delete()
+            session.query(Point).filter(Point.question_id == int(id)).delete()
             session.query(Answer).filter(
                 Answer.question_id == int(id)).delete()
-            session.query(Point).filter(Point.question_id == int(id)).delete()
+            session.query(Question).filter(Question.id == int(id)).delete()
             session.commit()
             # q=session.query(Question).filter(Question.id == int(id)).first()
             # session.delete(q)
@@ -237,8 +237,8 @@ class Jerocat:
 
     def answer_delete(self, id=None):
         if id != None:
-            session.query(Answer).filter(Answer.id == int(id)).delete()
             session.query(Point).filter(Point.answer_id == int(id)).delete()
+            session.query(Answer).filter(Answer.id == int(id)).delete()
             session.commit()
 
     def numerize():

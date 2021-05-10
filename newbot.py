@@ -127,6 +127,7 @@ def button(update: Update, context: CallbackContext) -> None:
 
     # query.edit_message_text(text=f"Selected option: {query.data}")
     chat_id = update.effective_chat.id
+    message_id = update.effective_message.message_id
     p = j.play_get(chat_id)
     param = (query.data).split("_")
     ok = False
@@ -155,6 +156,7 @@ def button(update: Update, context: CallbackContext) -> None:
     except Exception as e:
         print("Except callback_query_handler")
         print(e)
+    context.bot.deleteMessage(chat_id, message_id)
 
 
 def process_text(update, context):
