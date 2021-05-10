@@ -127,11 +127,16 @@ def button(update: Update, context: CallbackContext) -> None:
 
     # query.edit_message_text(text=f"Selected option: {query.data}")
     chat_id = update.effective_chat.id
+    message_id = update.effective_message.message_id
     p = j.play_get(chat_id)
     param = (query.data).split("_")
     ok = False
     try:
-        if p.status == j.STATUS_GAMES_MENU:
+        if param[0] == "aa":
+            answer_accept(update=update, context=context)
+        elif param[0] == "ad":
+            answer_forget(update=update, context=context)
+        elif p.status == j.STATUS_GAMES_MENU:
             ok = game_menu_response(p, update, context)
         elif p.status == j.STATUS_EDITING_QUESTIONS:
             ok = questions_edit_menu_response(p, update, context)
@@ -140,10 +145,6 @@ def button(update: Update, context: CallbackContext) -> None:
         elif p.status == j.STATUS_EDITING_QUESTION_TEXT:
             question_delete_menu_response(
                 play=p, update=update, context=context)
-        elif param[0] == "aa":
-            answer_accept(update=update, context=context)
-        elif param[0] == "ad":
-            answer_forget(update=update, context=context)
         else:
             print("Unknown command")
             print("p.status:"+str(p.status))
@@ -155,6 +156,7 @@ def button(update: Update, context: CallbackContext) -> None:
     except Exception as e:
         print("Except callback_query_handler")
         print(e)
+    context.bot.deleteMessage(chat_id, message_id)
 
 
 def process_text(update, context):
@@ -172,7 +174,7 @@ def process_text(update, context):
             pass
         elif (play.status == Jerocat.STATUS_GAMES_MENU):
             j.game_add(fix_chars(update.message.text))
-            games_menu(chat_id)
+            games_menu(update, context)
 
         elif (play.status == Jerocat.STATUS_EDITING_QUESTION_TEXT):
             j.question_update(play.get('question_id'), update.message.text)
@@ -366,10 +368,11 @@ def answer_accept(update, context):
 
 
 def answer_forget(update, context):
-    q = None
     query = update.callback_query
     param = (query.data).split("_")
-    a = j.answer_delete(id=param[1])
+    j.answer_delete(id=param[1])
+    context.bot.send_message(
+        chat_id=update.effective_chat.id, text="Resposta esborrada")
 
 
 def question_edit_message(chat_id, question, update, context):
@@ -412,8 +415,8 @@ def check_answer(update, context):
         altres_respostes = ""
         if (question.answers):
             for a in question.answers:
-                if a.accepted:
-                    altres_respostes += "\n - "+answer.text
+                if a.accepted == True:
+                    altres_respostes += "\n - " + a.text
             if (altres_respostes != ""):
                 altres_respostes = "\nAltres respostes:"+altres_respostes
         help_112 += altres_respostes
@@ -422,6 +425,7 @@ def check_answer(update, context):
                          InlineKeyboardButton("Esborra", callback_data="ad_"+str(answer.id))])
         context.bot.send_message(chat_id=ORACULUS, text=help_112,
                                  reply_markup=InlineKeyboardMarkup(keyboard))
+        # update.message.reply_text("Resposta incorrecta")
 
 
 def questions_edit_menu(update, context):
@@ -528,7 +532,7 @@ def questions_edit_menu_response(play, update, context):
             if j.game_delete(play.game.id):
                 context.bot.send_message(
                     chat_id=update.effective_chat.id, text="Joc esborrat")
-                games_menu(play.chat_id)
+                games_menu(update, context)
             else:
                 context.bot.send_message(
                     chat_id=update.effective_chat.id, text="Només esborraré jocs buits")

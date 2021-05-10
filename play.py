@@ -19,7 +19,7 @@ from base import Base
 
 
 class Play(Base):
-    __tablename__ = 'play'
+    __tablename__ = 'plays'
     id = Column(Integer, primary_key=True)
     chat_id = Column(Integer, unique=True)
     editor_enabled = Column(Boolean, default=False)
@@ -28,7 +28,7 @@ class Play(Base):
 #    menus = Column(MutableType)
     created_on = Column(DateTime, default=func.now())
     updated_on = Column(DateTime, default=func.now())
-    game_id = Column(Integer, ForeignKey('game.id'))
+    game_id = Column(Integer, ForeignKey('games.id'))
     game = relationship("Game", back_populates="plays")
 
     def __init__(self, chat_id):
