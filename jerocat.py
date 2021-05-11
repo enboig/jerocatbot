@@ -54,17 +54,28 @@ class Jerocat:
         """
         q = session.query(Question).filter(
             Question.game == game, Question.position == position).first()
-        if q==None:
+        if q == None:
             return None
         ans = session.query(Answer).filter(
-            Answer.question == q, Answer.text.ilike(answer), Answer.accepted==True).first()
+            Answer.question == q, Answer.text.ilike(answer), Answer.accepted == True).first()
         return ans
 
-    def user_add(self, id, username=None):
+    def user_add(self, id=None, username=None, first_name=None, last_name=None, user=None):
         '''
         Insert a user
         '''
-        u = User(id=id, username=username)
+        if user != None:
+            if id == None:
+                id = int(user.id)
+            if username == None:
+                username = user.username
+            if first_name == None:
+                first_name = user.first_name
+            if last_name == None:
+                last_name = user.last_name
+
+        u = User(id=id, username=username,
+                 first_name=first_name, last_name=last_name)
         session.add(u)
         session.commit()
         return u
@@ -73,17 +84,12 @@ class Jerocat:
         u = session.query(User).filter(
             User.id == user.id).first()
         if (u == None):
-            u = User(id=user.id,
-                     username=user.username,
-                     first_name=user.first_name,
-                     last_name=user.last_name)
-            session.add(u)
+            u = self.user_add(user=user)
         else:
             u.username = user.username
             u.first_name = user.first_name
             u.last_name = user.last_name
-
-        session.commit()
+            session.commit()
         return u
 
     def user_get(self, id=False, username=False):
@@ -137,7 +143,7 @@ class Jerocat:
         Returns the play
         '''
 #        s = session.query(Play).get(chat_id=chat_id)
-        p=None
+        p = None
         try:
             p = session.query(Play).filter(Play.chat_id == chat_id).first()
         finally:
@@ -233,7 +239,7 @@ class Jerocat:
             if text != None:
                 return session.query(Answer).filter(Answer.question == question, Answer.text == text).first()
             elif id != None:
-                return session.query(Answer).filter( Answer.id == id).first()
+                return session.query(Answer).filter(Answer.id == id).first()
 
     def answer_delete(self, id=None):
         if id != None:
@@ -248,8 +254,8 @@ class Jerocat:
         pass
 
     def points_get(self, play, question, only_accepted=True):
-        if only_accepted==True:
-            return session.query(Point).filter(Point.answer.has(Answer.accepted==True), Point.question_id == question.id, Point.play_id == play.id).order_by(Point.created_on).first()
+        if only_accepted == True:
+            return session.query(Point).filter(Point.answer.has(Answer.accepted == True), Point.question_id == question.id, Point.play_id == play.id).order_by(Point.created_on).first()
         else:
             return session.query(Point).filter(Point.question_id == question.id, Point.play_id == play.id).order_by(Point.created_on).first()
 
@@ -286,7 +292,7 @@ class Jerocat:
         '''
         checked = {}
         result = {}
-        for p in session.query(Point).join(Game).join(User, Point.user).filter(Point.answer.has(Answer.accepted==True), Point.play == play, Point.game == play.game).order_by(Point.created_on):
+        for p in session.query(Point).join(Game).join(User, Point.user).filter(Point.answer.has(Answer.accepted == True), Point.play == play, Point.game == play.game).order_by(Point.created_on):
             if checked.get(p.question_id) is None:
                 result[p.user_id] = result.get(p.user_id, 0)+1
                 checked[p.question_id] = True
