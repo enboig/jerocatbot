@@ -29,6 +29,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 j = Jerocat()
+j.questions_reposition()
 
 # # Define a few command handlers. These usually take the two arguments update and
 # # context.
@@ -226,11 +227,15 @@ def play_show_status(update, context):
             chat_id=update.effective_chat.id, text="No hi ha cap joc actiu")
     else:
         message = g.name+"\n"
+        total_points = 0
+        total_questions = 0
         for q in g.questions:
             message += str(q.position) + ". "
             point = j.points_get(p, q)
             if (point != None):
                 message += '"'+point.answer.text+'":  '
+                total_points += 1
+            total_questions += 1
             message += q.text
             message += "\n"
         rank = j.play_get_ranking(p)
@@ -243,6 +248,7 @@ def play_show_status(update, context):
                                                        if len(str(u.first_name)+str(u.last_name)) else str(u.username))+"\n"
                 else:
                     message += str(points) + " -> " + "unknown..." + "\n"
+            message += "Progrés: "+str(total_points)+"/"+str(total_questions)
         context.bot.send_message(
             chat_id=update.effective_chat.id, text=message)
 
@@ -359,13 +365,9 @@ def answers_edit_menu_response(play, update, context):
 
 
 def answer_accept(update, context):
-    print("def answer_accept(...):")
     query = update.callback_query
-    print("el missatge és: "+query.data)
     param = (query.data).split("_")
-    print("l'id de la resposta és: "+str(param[1]))
     a = j.answer_get(id=int(param[1]), only_accepted=False)
-    print("acceptant: "+str(a.text))
     a.accepted = True
     j.save()
 
@@ -618,8 +620,8 @@ def import_ods(update, context):
     chat_id = update.effective_chat.id
 
     if update.message.chat.type != "private":
-        context.bot.send_message(chat_id=update.effective_chat.id,
-                                 text="Només es poden importar jocs per converses privades")
+        # context.bot.send_message(chat_id=update.effective_chat.id,
+        #                          text="Només es poden importar jocs per converses privades")
         return
     p = j.play_get(chat_id)
 
