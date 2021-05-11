@@ -227,11 +227,15 @@ def play_show_status(update, context):
             chat_id=update.effective_chat.id, text="No hi ha cap joc actiu")
     else:
         message = g.name+"\n"
+        total_points = 0
+        total_questions = 0
         for q in g.questions:
             message += str(q.position) + ". "
             point = j.points_get(p, q)
             if (point != None):
                 message += '"'+point.answer.text+'":  '
+                total_points += 1
+            total_questions += 1
             message += q.text
             message += "\n"
         rank = j.play_get_ranking(p)
@@ -244,6 +248,7 @@ def play_show_status(update, context):
                                                        if len(str(u.first_name)+str(u.last_name)) else str(u.username))+"\n"
                 else:
                     message += str(points) + " -> " + "unknown..." + "\n"
+            message += "Progrés: "+str(total_points)+"/"+str(total_questions)
         context.bot.send_message(
             chat_id=update.effective_chat.id, text=message)
 
