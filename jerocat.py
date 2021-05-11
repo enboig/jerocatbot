@@ -37,15 +37,6 @@ class Jerocat:
     STATUS_GAME_PLAY = 12
 
     def __init__(self):
-        # if (config['database']["engine"] == "sqlite"):
-        #     self.engine = create_engine(
-        #         'sqlite:///'+config['database']["database"]+'.sqlite')
-        #     self.session = sessionmaker()
-        #     self.session.configure(bind=self.engine)
-        #     #Base = declarative_base()
-        #     print("create all!")
-        #     Base.metadata.create_all(self.engine)
-        # session = self.session()
         pass
 
     def answer_check(self, game, position, answer):
@@ -216,7 +207,7 @@ class Jerocat:
             pass
         elif text != None:
             pass
-        # TODO: refer els índexs
+        self.questions_reposition()
 
     def question_update(self, id=None, text=None):
         q = self.question_get(id=id)
@@ -297,3 +288,14 @@ class Jerocat:
                 result[p.user_id] = result.get(p.user_id, 0)+1
                 checked[p.question_id] = True
         return result
+
+    def questions_reposition(self):
+        game_id=-1
+        position=1
+        for question in session.query(Question).order_by(Question.game_id, Question.id):
+            if (game_id!=question.game_id):
+                game_id = question.game_id
+                position=1
+            question.position=position
+            session.commit()
+            position+=1
