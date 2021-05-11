@@ -238,8 +238,11 @@ def play_show_status(update, context):
             message += "\nRanking:\n"
             for uid, points in rank.items():
                 u = j.user_get(uid)
-                message += str(points) + " -> " + ((u.first_name+" "+u.last_name)
-                                                   if len(u.first_name+u.last_name) else u.username)+"\n"
+                if (u != None):
+                    message += str(points) + " -> " + ((str(u.first_name)+" "+str(u.last_name)).strip()
+                                                       if len(str(u.first_name)+str(u.last_name)) else str(u.username))+"\n"
+                else:
+                    message += str(points) + " -> " + "unknown..." + "\n"
         context.bot.send_message(
             chat_id=update.effective_chat.id, text=message)
 
@@ -397,7 +400,8 @@ def check_answer(update, context):
     if question == None:
         return
     answer = j.answer_check(play.game, position, answer_text)
-    user = update.effective_user
+    user = j.user_upsert(user=update.effective_user)
+
     if (answer != None):
         j.point_add(play, user, question, answer)
         play_show_status(update, context)
@@ -612,8 +616,6 @@ def import_ods(update, context):
     import os
 
     chat_id = update.effective_chat.id
-
-    print(str(update))
 
     if update.message.chat.type != "private":
         context.bot.send_message(chat_id=update.effective_chat.id,
