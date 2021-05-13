@@ -229,15 +229,20 @@ def play_show_status(update, context):
         message = g.name+"\n"
         total_points = 0
         total_questions = 0
+        done = ""
+        pending = ""
         for q in g.questions:
-            message += str(q.position) + ". "
             point = j.points_get(p, q)
             if (point != None):
-                message += '"'+point.answer.text+'":  '
+                done += str(q.position) + ". "
+                done += '"'+point.answer.text+'":  '
+                done += q.text+"\n"
                 total_points += 1
+            else:
+                pending += str(q.position) + ". "
+                pending += q.text+"\n"
             total_questions += 1
-            message += q.text
-            message += "\n"
+        message += done+pending
         rank = j.play_get_ranking(p)
         if (len(rank) > 0):
             message += "\nRanking:\n"
